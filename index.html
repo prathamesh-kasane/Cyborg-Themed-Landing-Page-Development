@@ -1,0 +1,2912 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-hud-mode="neural">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYNAPSE // IX — Humanity, Recompiled.</title>
+  <meta name="description" content="SYNAPSE // IX — Gen-IX Cybernetic Architecture & Biomechanical Augmentation Studio. Humanity, Recompiled." />
+
+  <!-- Google Fonts: Chakra Petch (Display), Space Grotesk (UI/Body), JetBrains Mono (HUD Telemetry) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,600&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            carbon: '#05070B',
+            gunmetal: '#0C1018',
+            gunmetalLight: '#131A26',
+            titanium: '#E6EDF5',
+            slateMuted: '#7D8B9F',
+            cyberCyan: '#00F0FF',
+            bioEmerald: '#00FF94',
+            signalCrimson: '#FF2E5B',
+            overclockAmber: '#FFB020',
+          },
+          fontFamily: {
+            display: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+            sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* =========================================================================
+       SYNAPSE // IX — BIOMECHANICAL HUD DESIGN TOKENS
+       Dynamic Theme Switching: Neural Mode (Cyan) vs Overclock Mode (Crimson)
+       ========================================================================= */
+    :root,
+    html[data-hud-mode="neural"] {
+      --bg-carbon: #05070B;
+      --bg-surface: #0C1018;
+      --bg-surface-elevated: #111824;
+      --text-primary: #E6EDF5;
+      --text-muted: #7D8B9F;
+
+      --accent: #00F0FF;
+      --accent-rgb: 0, 240, 255;
+      --accent-secondary: #00FF94;
+      --accent-secondary-rgb: 0, 255, 148;
+      --accent-alert: #FF2E5B;
+      --accent-alert-rgb: 255, 46, 91;
+
+      --hairline: rgba(0, 240, 255, 0.18);
+      --hairline-strong: rgba(0, 240, 255, 0.5);
+      --glow-soft: 0 0 28px rgba(0, 240, 255, 0.18);
+      --glow-strong: 0 0 36px rgba(0, 240, 255, 0.36);
+    }
+
+    html[data-hud-mode="overclock"] {
+      --accent: #FF2E5B;
+      --accent-rgb: 255, 46, 91;
+      --accent-secondary: #FFB020;
+      --accent-secondary-rgb: 255, 176, 32;
+      --accent-alert: #FFB020;
+      --accent-alert-rgb: 255, 176, 32;
+
+      --hairline: rgba(255, 46, 91, 0.24);
+      --hairline-strong: rgba(255, 46, 91, 0.62);
+      --glow-soft: 0 0 28px rgba(255, 46, 91, 0.22);
+      --glow-strong: 0 0 38px rgba(255, 46, 91, 0.44);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      background-color: var(--bg-carbon);
+      color: var(--text-primary);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle Blueprint Dot-Grid Background */
+    .blueprint-dots {
+      background-image:
+        radial-gradient(rgba(var(--accent-rgb), 0.16) 1px, transparent 1px),
+        linear-gradient(to right, rgba(var(--accent-rgb), 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(var(--accent-rgb), 0.03) 1px, transparent 1px);
+      background-size: 28px 28px, 112px 112px, 112px 112px;
+    }
+
+    /* Dynamic Accent Utility Classes */
+    .text-accent {
+      color: var(--accent);
+      transition: color 0.35s ease;
+    }
+    .text-accent-sec {
+      color: var(--accent-secondary);
+      transition: color 0.35s ease;
+    }
+    .bg-accent {
+      background-color: var(--accent);
+      transition: background-color 0.35s ease;
+    }
+    .bg-accent-soft {
+      background-color: rgba(var(--accent-rgb), 0.1);
+      transition: background-color 0.35s ease;
+    }
+    .border-accent {
+      border-color: var(--hairline);
+      transition: border-color 0.35s ease;
+    }
+    .border-accent-strong {
+      border-color: var(--hairline-strong);
+      transition: border-color 0.35s ease;
+    }
+
+    /* Chamfered / Angled Glassmorphic HUD Panel */
+    .hud-panel {
+      position: relative;
+      background: linear-gradient(155deg, rgba(16, 22, 34, 0.88) 0%, rgba(9, 13, 21, 0.94) 100%);
+      border: 1px solid var(--hairline);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 12px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hud-panel:hover {
+      border-color: var(--hairline-strong);
+      box-shadow: var(--glow-soft);
+    }
+
+    /* Chamfered Clip-Path Button & Badge */
+    .chamfer-btn {
+      clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+      transition: transform 0.2s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+    }
+    .chamfer-btn:active {
+      transform: scale(0.98);
+    }
+    .chamfer-card {
+      clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    }
+
+    /* Animated HUD Corner Brackets */
+    .hud-brackets {
+      position: relative;
+    }
+    .hud-brackets::before,
+    .hud-brackets::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+      transition: width 0.28s ease, height 0.28s ease, border-color 0.35s ease;
+    }
+    .hud-brackets::before {
+      top: -1px;
+      left: -1px;
+      border-top: 2px solid var(--accent);
+      border-left: 2px solid var(--accent);
+      border-top-left-radius: 8px;
+    }
+    .hud-brackets::after {
+      bottom: -1px;
+      right: -1px;
+      border-bottom: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+      border-bottom-right-radius: 8px;
+    }
+    .hud-brackets:hover::before,
+    .hud-brackets:hover::after {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Cyber-Glitch Hover Effect on Display Headline */
+    .glitch-text {
+      position: relative;
+      display: inline-block;
+    }
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .glitch-text:hover::before {
+      opacity: 0.78;
+      color: var(--accent);
+      transform: translate(-2px, -1px);
+      clip-path: inset(12% 0 58% 0);
+      animation: glitchSlice1 0.32s steps(2, end) infinite;
+    }
+    .glitch-text:hover::after {
+      opacity: 0.75;
+      color: var(--accent-alert);
+      transform: translate(2px, 1px);
+      clip-path: inset(56% 0 14% 0);
+      animation: glitchSlice2 0.28s steps(2, end) infinite;
+    }
+    @keyframes glitchSlice1 {
+      0% { clip-path: inset(10% 0 65% 0); transform: translate(-2px, 0); }
+      50% { clip-path: inset(42% 0 30% 0); transform: translate(2px, -1px); }
+      100% { clip-path: inset(18% 0 58% 0); transform: translate(-1px, 1px); }
+    }
+    @keyframes glitchSlice2 {
+      0% { clip-path: inset(60% 0 12% 0); transform: translate(2px, 1px); }
+      50% { clip-path: inset(25% 0 52% 0); transform: translate(-2px, 0); }
+      100% { clip-path: inset(70% 0 8% 0); transform: translate(1px, -1px); }
+    }
+
+    /* Scanning Laser Animation for Anatomy Lab & Biometric Modal */
+    @keyframes laserScanY {
+      0%, 100% { transform: translateY(18px); opacity: 0.25; }
+      10%, 90% { opacity: 0.9; }
+      50% { transform: translateY(442px); opacity: 0.95; }
+    }
+    .anatomy-laser {
+      animation: laserScanY 5.5s ease-in-out infinite;
+    }
+
+    @keyframes modalLaserScan {
+      0%, 100% { transform: translateY(8px); }
+      50% { transform: translateY(132px); }
+    }
+    .modal-laser-active {
+      animation: modalLaserScan 1.15s ease-in-out infinite;
+    }
+
+    /* Pulsing Hotspot Ring */
+    @keyframes hotspotRipple {
+      0% { r: 7; opacity: 0.9; }
+      100% { r: 22; opacity: 0; }
+    }
+    .hotspot-ripple {
+      animation: hotspotRipple 2.1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+
+    /* Subtle Scroll Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #05070B;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(var(--accent-rgb), 0.32);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(var(--accent-rgb), 0.68);
+    }
+
+    /* Tactical Crosshair Cursor (Desktop Fine Pointer Only) */
+    #tactical-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 32px;
+      height: 32px;
+      pointer-events: none;
+      z-index: 120;
+      transform: translate(-50%, -50%);
+      display: none;
+      transition: width 0.18s ease, height 0.18s ease, opacity 0.2s ease;
+    }
+    #tactical-cursor.is-interactive {
+      width: 46px;
+      height: 46px;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      #tactical-cursor {
+        display: block;
+      }
+    }
+
+    /* Range Slider Styling */
+    input[type="range"].cyber-range {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(125, 139, 159, 0.28);
+      outline: none;
+    }
+    input[type="range"].cyber-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--accent);
+      border: 2px solid #05070B;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.7);
+    }
+    input[type="range"].cyber-range::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--accent);
+      border: 2px solid #05070B;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.7);
+    }
+
+    /* Haptic Pad Bio-Hexagon Styling */
+    .haptic-hex {
+      transition: fill 0.14s ease, stroke 0.14s ease, transform 0.16s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    /* Reduced Motion Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-carbon text-titanium blueprint-dots selection:bg-[rgba(var(--accent-rgb),0.25)] selection:text-white">
+
+  <!-- Top Scroll Progress Indicator Bar -->
+  <div class="fixed top-0 left-0 right-0 h-[2.5px] z-[100] bg-transparent pointer-events-none">
+    <div id="scroll-progress" class="h-full w-0 transition-[width] duration-75" style="background: linear-gradient(90deg, var(--accent), var(--accent-secondary)); box-shadow: 0 0 10px var(--accent);"></div>
+  </div>
+
+  <!-- Custom Tactical Crosshair Cursor (Pointer/Desktop Only) -->
+  <div id="tactical-cursor" aria-hidden="true">
+    <svg class="w-full h-full" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="13" stroke="var(--accent)" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.75" />
+      <line x1="20" y1="2" x2="20" y2="10" stroke="var(--accent)" stroke-width="1.3" />
+      <line x1="20" y1="30" x2="20" y2="38" stroke="var(--accent)" stroke-width="1.3" />
+      <line x1="2" y1="20" x2="10" y2="20" stroke="var(--accent)" stroke-width="1.3" />
+      <line x1="30" y1="20" x2="38" y2="20" stroke="var(--accent)" stroke-width="1.3" />
+      <circle cx="20" cy="20" r="1.8" fill="var(--accent-secondary)" />
+    </svg>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[115] flex flex-col gap-2.5 max-w-[90vw] sm:max-w-sm pointer-events-none"></div>
+
+  <!-- =========================================================================
+       SECTION 1: STICKY RESPONSIVE TACTICAL HUD NAVBAR
+       ========================================================================= -->
+  <header class="sticky top-0 z-50 w-full bg-carbon/85 backdrop-blur-xl border-b border-accent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+      <!-- Brand Emblem + Wordmark -->
+      <a href="#overview" class="flex items-center gap-3 group shrink-0 focus:outline-none">
+        <div class="relative w-10 h-10 rounded-xl border border-accent bg-gunmetal flex items-center justify-center group-hover:border-accent-strong transition-all" style="box-shadow: var(--glow-soft);">
+          <!-- Custom Geometric SVG Iris / Circuit Emblem -->
+          <svg class="w-7 h-7" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" stroke="var(--accent)" stroke-width="1.4" fill="rgba(var(--accent-rgb),0.08)" />
+            <circle cx="18" cy="18" r="7" stroke="var(--accent-secondary)" stroke-width="1.2" stroke-dasharray="3 2" />
+            <circle cx="18" cy="18" r="3" fill="var(--accent)" />
+            <path d="M18 3v5M18 28v5M5 18h5M26 18h5" stroke="var(--accent)" stroke-width="1.1" stroke-opacity="0.7" />
+          </svg>
+        </div>
+        <div class="leading-none">
+          <div class="font-display font-bold tracking-[0.14em] text-base sm:text-lg text-titanium">
+            SYNAPSE <span class="text-accent">//</span> IX
+          </div>
+          <div class="font-mono text-[9px] tracking-[0.22em] text-slateMuted uppercase mt-1 hidden xs:block sm:block">
+            GEN-IX CYBERNETICS
+          </div>
+        </div>
+      </a>
+
+      <!-- Live Simulated Biometric Status Pill -->
+      <div class="hidden xl:flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-accent bg-gunmetal/90 font-mono text-[11px]">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background-color: var(--accent-secondary);"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2" style="background-color: var(--accent-secondary);"></span>
+        </span>
+        <span class="text-slateMuted">SYNC:</span>
+        <span id="nav-sync-val" class="font-semibold text-accent-sec">99.4%</span>
+        <span class="text-slateMuted/40">|</span>
+        <span id="nav-mode-badge" class="text-[10px] tracking-widest uppercase text-accent">NEURAL</span>
+      </div>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-6 font-mono text-xs tracking-[0.16em] uppercase text-slateMuted" aria-label="Primary Navigation">
+        <a href="#overview" class="hover:text-titanium transition-colors py-2">Overview</a>
+        <a href="#anatomy-lab" class="hover:text-titanium transition-colors py-2">Anatomy Lab</a>
+        <a href="#architecture" class="hover:text-titanium transition-colors py-2">Architecture</a>
+        <a href="#configurator" class="hover:text-titanium transition-colors py-2">Rig Configurator</a>
+      </nav>
+
+      <!-- HUD Mode Toggle + Initiate Sync CTA + Mobile Hamburger -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Interactive HUD Mode Toggle (Neural vs Overclock) -->
+        <button
+          id="hud-mode-toggle"
+          type="button"
+          onclick="toggleHudMode()"
+          aria-label="Toggle Neural or Overclock HUD Mode"
+          class="inline-flex items-center gap-2 px-2.5 sm:px-3.5 py-2 rounded-xl border border-accent bg-gunmetal hover:border-accent-strong font-mono text-[10px] sm:text-[11px] tracking-widest uppercase transition-all"
+        >
+          <span id="mode-indicator-dot" class="w-2 h-2 rounded-full bg-accent"></span>
+          <span id="mode-toggle-label" class="text-titanium hidden sm:inline">NEURAL</span>
+          <span class="text-slateMuted hidden md:inline">/</span>
+          <span id="mode-toggle-alt" class="text-slateMuted text-[10px]">OVERCLOCK</span>
+        </button>
+
+        <!-- Primary CTA -->
+        <button
+          type="button"
+          onclick="openCalibrationModal()"
+          class="chamfer-btn inline-flex items-center gap-2 px-3.5 sm:px-5 py-2.5 bg-accent text-carbon font-display font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110"
+          style="box-shadow: var(--glow-soft);"
+        >
+          <span>Initiate Sync</span>
+          <svg class="w-3.5 h-3.5 hidden sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+
+        <!-- Mobile Menu Button -->
+        <button
+          id="mobile-menu-btn"
+          type="button"
+          aria-label="Open Navigation Drawer"
+          class="lg:hidden p-2.5 rounded-xl border border-accent bg-gunmetal text-titanium hover:border-accent-strong"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 7h16M4 12h16M9 17h11" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div id="mobile-drawer" class="fixed inset-0 z-[80] hidden" aria-hidden="true">
+    <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-carbon/80 backdrop-blur-sm"></div>
+    <aside class="absolute right-0 top-0 bottom-0 w-72 max-w-[85vw] bg-gunmetal border-l border-accent p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-5 border-b border-accent">
+          <div class="font-display font-bold tracking-widest text-sm text-titanium">SYNAPSE <span class="text-accent">//</span> IX</div>
+          <button type="button" onclick="closeMobileDrawer()" aria-label="Close Menu" class="p-2 rounded-lg border border-accent text-slateMuted hover:text-titanium">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+
+        <div class="mt-4 px-3 py-2 rounded-xl bg-carbon border border-accent flex items-center justify-between font-mono text-[11px]">
+          <span class="text-slateMuted">BIO-SYNC</span>
+          <span id="mobile-sync-val" class="text-accent-sec font-semibold">99.4% NOMINAL</span>
+        </div>
+
+        <nav class="mt-6 flex flex-col gap-2 font-mono text-xs tracking-[0.18em] uppercase">
+          <a href="#overview" onclick="closeMobileDrawer()" class="px-3.5 py-3 rounded-xl hover:bg-accent-soft hover:text-accent transition-colors">01 // Overview</a>
+          <a href="#anatomy-lab" onclick="closeMobileDrawer()" class="px-3.5 py-3 rounded-xl hover:bg-accent-soft hover:text-accent transition-colors">02 // Anatomy Lab</a>
+          <a href="#architecture" onclick="closeMobileDrawer()" class="px-3.5 py-3 rounded-xl hover:bg-accent-soft hover:text-accent transition-colors">03 // Architecture</a>
+          <a href="#configurator" onclick="closeMobileDrawer()" class="px-3.5 py-3 rounded-xl hover:bg-accent-soft hover:text-accent transition-colors">04 // Rig Configurator</a>
+        </nav>
+      </div>
+
+      <div class="pt-5 border-t border-accent space-y-3">
+        <button
+          type="button"
+          onclick="toggleHudMode()"
+          class="w-full py-2.5 rounded-xl border border-accent bg-carbon font-mono text-[11px] tracking-widest uppercase text-titanium"
+        >
+          Switch HUD Mode
+        </button>
+        <button
+          type="button"
+          onclick="closeMobileDrawer(); openCalibrationModal();"
+          class="chamfer-btn w-full py-3 bg-accent text-carbon font-display font-bold text-xs tracking-widest uppercase"
+        >
+          Initiate Biometric Sync
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- =========================================================================
+       SECTION 2: HERO SECTION ("HUMANITY, RECOMPILED.")
+       ========================================================================= -->
+  <section id="overview" class="relative overflow-hidden border-b border-accent">
+    <!-- Ambient Radial Backlight -->
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at 75% 42%, rgba(var(--accent-rgb), 0.12) 0%, rgba(5, 7, 11, 0) 52%), radial-gradient(circle at 18% 72%, rgba(var(--accent-secondary-rgb), 0.06) 0%, rgba(5, 7, 11, 0) 46%);"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+
+        <!-- Left Column: Copy, CTAs & Animated Metrics -->
+        <div class="lg:col-span-6 min-w-0">
+          <!-- Technical Eyebrow Badge -->
+          <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-accent bg-gunmetal/85 backdrop-blur-md mb-6">
+            <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+            <span class="font-mono text-[10px] sm:text-xs tracking-[0.2em] uppercase text-accent">
+              GEN-IX CYBERNETIC ARCHITECTURE // 2026
+            </span>
+          </div>
+
+          <!-- Display Headline with Cyber-Glitch Hover Effect -->
+          <h1 class="font-display font-bold uppercase tracking-tight leading-[0.95]" style="font-size: clamp(2.5rem, 6.2vw, 4.75rem);">
+            <span class="block text-titanium glitch-text" data-text="HUMANITY,">HUMANITY,</span>
+            <span class="block text-accent glitch-text mt-1" data-text="RECOMPILED.">RECOMPILED.</span>
+          </h1>
+
+          <!-- Concise Value Proposition -->
+          <p class="mt-6 text-sm sm:text-base lg:text-lg text-slateMuted max-w-xl leading-relaxed">
+            Precision titanium-graphene prosthetics and zero-lag bidirectional neural interfaces. <span class="text-titanium font-medium">SYNAPSE // IX</span> fuses biological intuition with industrial-grade machine augmentation—zero rejection, infinite clarity.
+          </p>
+
+          <!-- Dual Interactive CTAs -->
+          <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            <a
+              href="#anatomy-lab"
+              class="chamfer-btn inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-accent text-carbon font-display font-bold text-xs sm:text-sm tracking-[0.16em] uppercase hover:brightness-110"
+              style="box-shadow: var(--glow-soft);"
+            >
+              <span>Explore Augments</span>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <path d="M12 5v14M6 13l6 6 6-6" />
+              </svg>
+            </a>
+
+            <button
+              type="button"
+              onclick="openCalibrationModal()"
+              class="chamfer-btn inline-flex items-center justify-center gap-2.5 px-6 py-4 border border-accent-strong bg-gunmetal/80 text-titanium hover:bg-accent-soft hover:text-accent font-display font-semibold text-xs sm:text-sm tracking-[0.16em] uppercase"
+            >
+              <svg class="w-4 h-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" />
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+              </svg>
+              <span>Biometric Calibration</span>
+            </button>
+          </div>
+
+          <!-- 3 Animated Key Metrics -->
+          <div id="hero-metrics" class="mt-10 pt-8 border-t border-accent grid grid-cols-3 gap-3 sm:gap-6">
+            <div class="min-w-0">
+              <div class="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-accent">
+                <span class="hero-count" data-target="0.2" data-decimals="1">0.2</span><span class="text-xs sm:text-base ml-0.5">ms</span>
+              </div>
+              <div class="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-slateMuted mt-1">
+                Neural Latency
+              </div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-accent-sec">
+                <span class="hero-count" data-target="99.98" data-decimals="2">99.98</span><span class="text-xs sm:text-base">%</span>
+              </div>
+              <div class="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-slateMuted mt-1">
+                Bio-Sync Rate
+              </div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-titanium">
+                <span class="hero-count" data-target="18" data-decimals="0">18</span><span class="text-xs sm:text-base text-accent">-Yr</span>
+              </div>
+              <div class="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-slateMuted mt-1">
+                Core Cycle
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: 60fps Interactive Cybernetic Eye / Neural-Lattice Canvas -->
+        <div class="lg:col-span-6 min-w-0">
+          <div id="hero-canvas-shell" class="hud-panel hud-brackets p-3 sm:p-4 overflow-hidden">
+            <!-- Top Telemetry Header -->
+            <div class="flex items-center justify-between gap-2 pb-3 mb-2 border-b border-accent font-mono text-[10px] tracking-widest uppercase">
+              <div class="flex items-center gap-2 text-accent">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent animate-ping"></span>
+                <span>OPTIC-LATTICE // LIVE TRACKING</span>
+              </div>
+              <span id="hero-hud-status" class="text-slateMuted">CURSOR LOCK: STANDBY</span>
+            </div>
+
+            <!-- Fluid Responsive Canvas Stage -->
+            <div class="relative w-full aspect-square sm:aspect-[16/13] lg:aspect-square max-h-[500px] rounded-lg overflow-hidden bg-[#04060A] border border-accent/40">
+              <canvas id="cyber-eye-canvas" class="block w-full h-full touch-none"></canvas>
+
+              <!-- Floating HUD Corner Readouts -->
+              <div class="absolute top-3 left-3 px-2.5 py-1.5 rounded bg-carbon/80 border border-accent font-mono text-[10px] leading-tight pointer-events-none">
+                <div class="text-slateMuted">VEC_COORD</div>
+                <div id="eye-coords" class="text-titanium font-semibold">X: 000 // Y: 000</div>
+              </div>
+
+              <div class="absolute top-3 right-3 px-2.5 py-1.5 rounded bg-carbon/80 border border-accent font-mono text-[10px] text-right leading-tight pointer-events-none">
+                <div class="text-slateMuted">IRIS APERTURE</div>
+                <div id="eye-aperture" class="text-accent font-semibold">64.2%</div>
+              </div>
+
+              <div class="absolute bottom-3 left-3 px-2.5 py-1.5 rounded bg-carbon/80 border border-accent font-mono text-[10px] leading-tight pointer-events-none">
+                <div class="text-slateMuted">SYNAPSE FREQ</div>
+                <div id="eye-freq" class="text-accent-sec font-semibold">142.8 Hz</div>
+              </div>
+
+              <div class="absolute bottom-3 right-3 px-2.5 py-1.5 rounded bg-carbon/80 border border-accent font-mono text-[10px] text-right leading-tight pointer-events-none">
+                <div class="text-slateMuted">LOCK STATE</div>
+                <div id="eye-lock" class="text-titanium font-semibold">NOMINAL</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 3: INTERACTIVE CYBORG ANATOMY & AUGMENTATION EXPLORER ("ANATOMY LAB")
+       ========================================================================= -->
+  <section id="anatomy-lab" class="relative py-20 sm:py-28 border-b border-accent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="reveal flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+        <div>
+          <p class="font-mono text-xs tracking-[0.22em] text-accent uppercase mb-2.5">01 // BIOMECHANICAL SCHEMATIC</p>
+          <h2 class="font-display font-bold text-3xl sm:text-5xl uppercase tracking-tight text-titanium">
+            Anatomy <span class="text-accent">Lab</span>
+          </h2>
+        </div>
+        <p class="max-w-xl text-sm sm:text-base text-slateMuted leading-relaxed">
+          Inspect five surgical-grade Gen-IX cybernetic subsystems. Select any pulsing meridian hotspot on the schematic or toggle the telemetry tabs to examine hardware tolerances and run a live stress simulation.
+        </p>
+      </div>
+
+      <!-- Two-Column Interactive Showcase -->
+      <div class="reveal grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+
+        <!-- Left Panel: Futuristic 2D SVG Cyborg Torso/Head Schematic -->
+        <div class="lg:col-span-6 hud-panel hud-brackets p-5 sm:p-6 flex flex-col justify-between min-w-0">
+          <div class="flex items-center justify-between font-mono text-[10px] tracking-widest uppercase mb-3">
+            <span class="text-accent">SCHEMATIC // MK-IX SPECIMEN</span>
+            <span class="text-slateMuted">5 ACTIVE NODES</span>
+          </div>
+
+          <!-- High-Detail Inline SVG Cyborg Anatomy with Scanning Laser & 5 Clickable Hotspots -->
+          <div class="relative w-full rounded-xl bg-[#04060A] border border-accent/40 overflow-hidden flex items-center justify-center py-4 px-2">
+            <svg id="anatomy-svg" viewBox="0 0 380 470" class="w-full max-w-[360px] h-auto select-none" role="img" aria-label="Interactive Cyborg Anatomy Schematic">
+              <defs>
+                <linearGradient id="scanLaserGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="var(--accent)" stop-opacity="0" />
+                  <stop offset="50%" stop-color="var(--accent)" stop-opacity="0.95" />
+                  <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="chassisGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="rgba(var(--accent-rgb),0.14)" />
+                  <stop offset="100%" stop-color="rgba(var(--accent-rgb),0.02)" />
+                </linearGradient>
+              </defs>
+
+              <!-- Background Blueprint Crosshairs & Scale -->
+              <line x1="190" y1="10" x2="190" y2="460" stroke="rgba(var(--accent-rgb),0.14)" stroke-width="1" stroke-dasharray="4 4" />
+              <line x1="20" y1="210" x2="360" y2="210" stroke="rgba(var(--accent-rgb),0.1)" stroke-width="1" stroke-dasharray="3 5" />
+              <circle cx="190" cy="215" r="145" stroke="rgba(var(--accent-rgb),0.1)" stroke-width="1" fill="none" />
+              <circle cx="190" cy="215" r="112" stroke="rgba(var(--accent-rgb),0.08)" stroke-width="0.9" stroke-dasharray="6 4" fill="none" />
+
+              <!-- Cranium & Jawline Cybernetic Shell -->
+              <path d="M150 58 C150 30, 230 30, 230 58 L234 94 C234 114, 214 132, 190 136 C166 132, 146 114, 146 94 Z" fill="url(#chassisGrad)" stroke="var(--accent)" stroke-width="1.6" stroke-opacity="0.75" />
+              <!-- Cranial Neural Circuitry -->
+              <path d="M164 56 L176 46 L204 46 L216 56 M170 68 L190 60 L210 68" stroke="var(--accent-secondary)" stroke-width="1" fill="none" stroke-opacity="0.75" />
+              <!-- Ocular Visor Band -->
+              <path d="M154 84 L176 80 L204 80 L226 84 L222 96 L158 96 Z" fill="rgba(var(--accent-rgb),0.2)" stroke="var(--accent)" stroke-width="1.2" />
+              <circle cx="174" cy="88" r="3.5" fill="var(--accent)" />
+              <circle cx="206" cy="88" r="3.5" fill="var(--accent)" />
+
+              <!-- Cervical Hydraulic Neck Pistons -->
+              <path d="M172 134 L168 164 M208 134 L212 164 M184 136 L184 166 M196 136 L196 166" stroke="var(--accent)" stroke-width="1.3" stroke-opacity="0.65" />
+
+              <!-- Clavicle & Armored Thoracic Chassis -->
+              <path d="M166 162 L112 178 L88 206 L104 268 L128 338 L146 420 L234 420 L252 338 L276 268 L292 206 L268 178 L214 162 Z" fill="url(#chassisGrad)" stroke="var(--accent)" stroke-width="1.6" stroke-opacity="0.75" />
+
+              <!-- Sub-Dermal Exo-Weave Hex Mesh Plates (Ribcage / Flank) -->
+              <path d="M126 218 L156 206 L156 254 L132 264 Z M254 218 L224 206 L224 254 L248 264 Z" fill="rgba(var(--accent-secondary-rgb),0.08)" stroke="var(--accent-secondary)" stroke-width="1" stroke-opacity="0.6" />
+              <path d="M138 282 L168 274 L168 320 L146 328 Z M242 282 L212 274 L212 320 L234 328 Z" fill="rgba(var(--accent-rgb),0.07)" stroke="var(--accent)" stroke-width="1" stroke-opacity="0.45" />
+
+              <!-- Cardio-Pulse Core Chamber (Center Chest) -->
+              <polygon points="190,192 214,206 214,234 190,248 166,234 166,206" fill="rgba(var(--accent-rgb),0.15)" stroke="var(--accent)" stroke-width="1.5" />
+              <circle cx="190" cy="220" r="12" fill="rgba(var(--accent-secondary-rgb),0.2)" stroke="var(--accent-secondary)" stroke-width="1.4" />
+              <circle cx="190" cy="220" r="4.5" fill="var(--accent-secondary)" />
+
+              <!-- Spinal Conduit Line -->
+              <path d="M190 136 L190 192 M190 248 L190 416" stroke="var(--accent)" stroke-width="1.8" stroke-dasharray="5 3" stroke-opacity="0.65" />
+
+              <!-- Left Structural Shoulder & Arm -->
+              <path d="M112 178 L72 198 L54 278 L46 368 L68 372 L84 288 L104 246" fill="rgba(var(--accent-rgb),0.05)" stroke="var(--accent)" stroke-width="1.3" stroke-opacity="0.55" />
+
+              <!-- Right Bionic Upper Limb (KINETIC-ARM Mk.VII - Highlighted) -->
+              <path d="M268 178 L308 198 L328 278 L338 368 L312 374 L294 288 L276 246" fill="rgba(var(--accent-rgb),0.14)" stroke="var(--accent)" stroke-width="1.8" />
+              <!-- Mechanical Elbow & Forearm Actuators -->
+              <circle cx="312" cy="278" r="10" fill="#05070B" stroke="var(--accent-secondary)" stroke-width="1.5" />
+              <line x1="296" y1="208" x2="310" y2="268" stroke="var(--accent-secondary)" stroke-width="1.3" />
+              <line x1="316" y1="288" x2="328" y2="356" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 2" />
+
+              <!-- Animated Vertical Scanning Laser Line -->
+              <g class="anatomy-laser" pointer-events="none">
+                <rect x="28" y="0" width="324" height="2.2" fill="url(#scanLaserGrad)" />
+                <rect x="28" y="-12" width="324" height="12" fill="url(#scanLaserGrad)" opacity="0.16" />
+              </g>
+
+              <!-- 5 Interactive Pulsing Hotspots (Populated & Hydrated for Click/Keyboard) -->
+              <g id="anatomy-hotspots"></g>
+            </svg>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between font-mono text-[10px] text-slateMuted">
+            <span>TAP OR CLICK ANY NODE TO INSPECT</span>
+            <span id="anatomy-active-tag" class="text-accent font-semibold">NODE: OPTIC-V4</span>
+          </div>
+        </div>
+
+        <!-- Right Panel: Dynamic Hardware Telemetry Card -->
+        <div class="lg:col-span-6 hud-panel hud-brackets p-5 sm:p-8 flex flex-col justify-between min-w-0">
+          <div>
+            <!-- Quick Module Selector Tabs (Accessible on Mobile & Desktop) -->
+            <div id="anatomy-tabs" class="flex flex-wrap gap-2 pb-5 border-b border-accent" role="tablist" aria-label="Cybernetic Modules"></div>
+
+            <!-- Module Header -->
+            <div class="mt-6 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div class="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] uppercase text-accent">
+                  <span id="mod-code">OPTIC-V4</span>
+                  <span class="text-slateMuted">//</span>
+                  <span id="mod-slot" class="text-slateMuted">CRANIAL VISUAL ARRAY</span>
+                </div>
+                <h3 id="mod-title" class="mt-1.5 font-display font-bold text-2xl sm:text-3xl text-titanium uppercase">
+                  Ocular Optics
+                </h3>
+              </div>
+              <span id="mod-status-pill" class="px-3 py-1 rounded-full border border-accent bg-accent-soft font-mono text-[10px] tracking-widest uppercase text-accent-sec">
+                STATUS: OPTIMAL
+              </span>
+            </div>
+
+            <!-- Module Description -->
+            <p id="mod-desc" class="mt-4 text-sm sm:text-base text-slateMuted leading-relaxed"></p>
+
+            <!-- Highlight Specs Chips -->
+            <div id="mod-specs" class="mt-5 flex flex-wrap gap-2"></div>
+
+            <!-- Animated Telemetry Progress Bars -->
+            <div class="mt-7 space-y-4">
+              <div>
+                <div class="flex justify-between font-mono text-xs mb-1.5">
+                  <span class="text-slateMuted uppercase tracking-wider">Precision Index</span>
+                  <span id="bar-val-precision" class="text-titanium font-semibold">98%</span>
+                </div>
+                <div class="h-2 rounded-full bg-carbon border border-accent/30 overflow-hidden">
+                  <div id="bar-fill-precision" class="h-full rounded-full transition-all duration-500" style="width: 98%; background: linear-gradient(90deg, var(--accent), var(--accent-secondary));"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-mono text-xs mb-1.5">
+                  <span class="text-slateMuted uppercase tracking-wider">Power Efficiency</span>
+                  <span id="bar-val-efficiency" class="text-titanium font-semibold">94%</span>
+                </div>
+                <div class="h-2 rounded-full bg-carbon border border-accent/30 overflow-hidden">
+                  <div id="bar-fill-efficiency" class="h-full rounded-full transition-all duration-500" style="width: 94%; background: linear-gradient(90deg, var(--accent), var(--accent-secondary));"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-mono text-xs mb-1.5">
+                  <span class="text-slateMuted uppercase tracking-wider">Titanium Durability</span>
+                  <span id="bar-val-durability" class="text-titanium font-semibold">91%</span>
+                </div>
+                <div class="h-2 rounded-full bg-carbon border border-accent/30 overflow-hidden">
+                  <div id="bar-fill-durability" class="h-full rounded-full transition-all duration-500" style="width: 91%; background: linear-gradient(90deg, var(--accent), var(--accent-secondary));"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-mono text-xs mb-1.5">
+                  <span class="text-slateMuted uppercase tracking-wider">Neural Sync Coherence</span>
+                  <span id="bar-val-sync" class="text-accent-sec font-semibold">99.6%</span>
+                </div>
+                <div class="h-2 rounded-full bg-carbon border border-accent/30 overflow-hidden">
+                  <div id="bar-fill-sync" class="h-full rounded-full transition-all duration-500" style="width: 99.6%; background: linear-gradient(90deg, var(--accent-secondary), var(--accent));"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Stress Test Footer Bar -->
+          <div class="mt-8 pt-5 border-t border-accent flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="grid grid-cols-3 gap-3 font-mono text-[11px] flex-1">
+              <div class="p-2.5 rounded-lg bg-carbon border border-accent/40">
+                <div class="text-[9px] text-slateMuted uppercase">LOAD</div>
+                <div id="stress-load" class="text-titanium font-semibold mt-0.5">24%</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-carbon border border-accent/40">
+                <div class="text-[9px] text-slateMuted uppercase">DRAW</div>
+                <div id="stress-watts" class="text-accent font-semibold mt-0.5">14.2 W</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-carbon border border-accent/40">
+                <div class="text-[9px] text-slateMuted uppercase">TEMP</div>
+                <div id="stress-temp" class="text-accent-sec font-semibold mt-0.5">36.8°C</div>
+              </div>
+            </div>
+
+            <button
+              id="stress-test-btn"
+              type="button"
+              onclick="toggleStressTest()"
+              class="chamfer-btn shrink-0 px-5 py-3.5 border border-accent-strong bg-accent-soft hover:bg-accent hover:text-carbon text-accent font-display font-bold text-xs tracking-[0.16em] uppercase"
+            >
+              Run Stress Test
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 4: BENTO GRID — "SYSTEM ARCHITECTURE"
+       ========================================================================= -->
+  <section id="architecture" class="relative py-20 sm:py-28 border-b border-accent bg-[#06090F]/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="reveal flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+        <div>
+          <p class="font-mono text-xs tracking-[0.22em] text-accent uppercase mb-2.5">02 // REAL-TIME TELEMETRY SUITE</p>
+          <h2 class="font-display font-bold text-3xl sm:text-5xl uppercase tracking-tight text-titanium">
+            System <span class="text-accent">Architecture</span>
+          </h2>
+        </div>
+        <p class="max-w-xl text-sm sm:text-base text-slateMuted leading-relaxed">
+          Every SYNAPSE // IX chassis runs on our deterministic microkernel—streamlining sub-millisecond neural waveforms, live OTA diagnostics, and tactile sensor arrays.
+        </p>
+      </div>
+
+      <!-- Asymmetrical Responsive Bento Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <!-- CARD 1 (Wide: 7 cols): 60fps Live Neural & ECG Dual-Wave Oscilloscope -->
+        <article class="reveal md:col-span-12 lg:col-span-7 hud-panel hud-brackets p-5 sm:p-6 flex flex-col justify-between min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <div class="font-mono text-[10px] tracking-[0.2em] text-accent uppercase">CHANNEL A+B // DUAL-WAVE OSCILLOSCOPE</div>
+              <h3 class="font-display font-bold text-xl sm:text-2xl text-titanium mt-0.5">Live Neural &amp; ECG Telemetry</h3>
+            </div>
+            <!-- State Toggle: Rest State vs Combat Focus -->
+            <div class="inline-flex rounded-lg border border-accent bg-carbon p-1 font-mono text-[10px] uppercase">
+              <button
+                id="wave-state-rest"
+                type="button"
+                onclick="setWaveState('rest')"
+                class="px-3 py-1.5 rounded-md bg-accent text-carbon font-bold transition-all"
+              >
+                Rest State
+              </button>
+              <button
+                id="wave-state-combat"
+                type="button"
+                onclick="setWaveState('combat')"
+                class="px-3 py-1.5 rounded-md text-slateMuted hover:text-titanium transition-all"
+              >
+                Combat Focus
+              </button>
+            </div>
+          </div>
+
+          <!-- Responsive Oscilloscope Canvas Container -->
+          <div class="relative w-full h-52 sm:h-60 rounded-xl bg-[#04060A] border border-accent/40 overflow-hidden">
+            <canvas id="oscilloscope-canvas" class="block w-full h-full"></canvas>
+            <div class="absolute top-2.5 left-3 flex items-center gap-4 font-mono text-[10px] pointer-events-none">
+              <span class="flex items-center gap-1.5 text-accent">
+                <span class="w-2 h-0.5 bg-accent inline-block"></span>NEURAL BCI (γ-WAVE)
+              </span>
+              <span class="flex items-center gap-1.5 text-accent-sec">
+                <span class="w-2 h-0.5 inline-block" style="background: var(--accent-secondary);"></span>CARDIO ECG
+              </span>
+            </div>
+            <div id="osc-bpm-readout" class="absolute top-2.5 right-3 font-mono text-[10px] text-titanium bg-carbon/80 px-2 py-0.5 rounded border border-accent/40 pointer-events-none">
+              64 BPM · 42 Hz
+            </div>
+          </div>
+
+          <!-- Frequency / Gain Control Slider -->
+          <div class="mt-4 pt-4 border-t border-accent flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3 flex-1">
+              <label for="osc-gain-slider" class="font-mono text-[11px] text-slateMuted uppercase shrink-0">Gain / Freq</label>
+              <input id="osc-gain-slider" type="range" min="1" max="10" value="4" class="cyber-range w-full" />
+              <span id="osc-gain-val" class="font-mono text-xs text-accent font-semibold w-10 text-right">4.0x</span>
+            </div>
+            <span class="font-mono text-[10px] text-slateMuted uppercase">SAMPLE RATE: 10,000 HZ</span>
+          </div>
+        </article>
+
+        <!-- CARD 2 (5 cols): Interactive Mini Diagnostic Terminal ("SYNAPSE-OS v9.4") -->
+        <article class="reveal md:col-span-12 lg:col-span-5 hud-panel hud-brackets p-5 sm:p-6 flex flex-col justify-between min-w-0">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div>
+              <div class="font-mono text-[10px] tracking-[0.2em] text-accent-sec uppercase">KERNEL SHELL</div>
+              <h3 class="font-display font-bold text-xl text-titanium">SYNAPSE-OS v9.4</h3>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-signalCrimson/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-overclockAmber/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-bioEmerald/80"></span>
+            </div>
+          </div>
+
+          <!-- Terminal Output Viewport -->
+          <div id="terminal-output" class="h-52 sm:h-56 rounded-xl bg-[#030508] border border-accent/40 p-3.5 font-mono text-[11px] leading-relaxed overflow-y-auto space-y-1.5 text-slateMuted">
+            <div class="text-accent">[BOOT] SYNAPSE-OS v9.4.2-ix initialized.</div>
+            <div class="text-accent-sec">[OK] 128-channel cortical bridge verified (0.2ms).</div>
+            <div>[READY] Select a diagnostic command below to query rig telemetry.</div>
+          </div>
+
+          <!-- Clickable Quick-Command Buttons -->
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button type="button" onclick="runTerminalCmd('diag --neural')" class="px-3 py-2 rounded-lg border border-accent bg-carbon hover:bg-accent-soft hover:text-accent font-mono text-[11px] text-titanium transition-colors">
+              diag --neural
+            </button>
+            <button type="button" onclick="runTerminalCmd('scan --biometrics')" class="px-3 py-2 rounded-lg border border-accent bg-carbon hover:bg-accent-soft hover:text-accent font-mono text-[11px] text-titanium transition-colors">
+              scan --biometrics
+            </button>
+            <button type="button" onclick="runTerminalCmd('patch --ota')" class="px-3 py-2 rounded-lg border border-accent bg-carbon hover:bg-accent-soft hover:text-accent font-mono text-[11px] text-titanium transition-colors">
+              patch --ota
+            </button>
+            <button type="button" onclick="clearTerminal()" class="ml-auto px-2.5 py-2 rounded-lg border border-slateMuted/30 bg-carbon hover:text-titanium font-mono text-[10px] text-slateMuted uppercase">
+              Clear
+            </button>
+          </div>
+        </article>
+
+        <!-- CARD 3 (7 cols): Interactive Tactile Haptic Pad -->
+        <article class="reveal md:col-span-7 hud-panel hud-brackets p-5 sm:p-6 flex flex-col justify-between min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <div class="font-mono text-[10px] tracking-[0.2em] text-accent uppercase">KINETIC-ARM // DERMAL ARRAY</div>
+              <h3 class="font-display font-bold text-xl sm:text-2xl text-titanium">Tactile Haptic Pad</h3>
+            </div>
+            <div class="flex items-center gap-3 font-mono text-xs">
+              <div class="px-3 py-1.5 rounded-lg bg-carbon border border-accent">
+                <span class="text-slateMuted text-[10px] mr-1.5">FORCE:</span>
+                <span id="haptic-newtons" class="text-accent font-bold">0.0 N</span>
+              </div>
+              <div class="hidden sm:block px-3 py-1.5 rounded-lg bg-carbon border border-accent">
+                <span class="text-slateMuted text-[10px] mr-1.5">CELLS:</span>
+                <span id="haptic-cells" class="text-accent-sec font-bold">00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Bio-Hexagon SVG Sensor Surface -->
+          <div id="haptic-pad-surface" class="relative w-full rounded-xl bg-[#04060A] border border-accent/40 p-3 sm:p-4 overflow-hidden touch-none cursor-crosshair">
+            <svg id="haptic-hex-svg" viewBox="0 0 540 190" class="w-full h-auto block" aria-label="Interactive Tactile Haptic Hexagon Sensor Pad"></svg>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between font-mono text-[10px] text-slateMuted uppercase">
+            <span>GLIDE CURSOR OR FINGER TO SIMULATE GRIP PRESSURE</span>
+            <span id="haptic-coord" class="text-titanium">CELL: IDLE</span>
+          </div>
+        </article>
+
+        <!-- CARD 4 (5 cols): Biocompatibility & Zero-Rejection Stats -->
+        <article class="reveal md:col-span-5 hud-panel hud-brackets p-5 sm:p-6 flex flex-col justify-between min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <div class="font-mono text-[10px] tracking-[0.2em] text-accent-sec uppercase">CLINICAL BIOSAFETY</div>
+              <h3 class="font-display font-bold text-xl sm:text-2xl text-titanium">Zero-Rejection Mesh</h3>
+            </div>
+            <span class="px-2.5 py-1 rounded border border-accent bg-accent-soft font-mono text-[10px] text-accent">ISO-IX CERT</span>
+          </div>
+
+          <!-- Animated Circular SVG Progress Ring (99.98%) -->
+          <div id="biocompat-ring-wrap" class="my-4 flex flex-col sm:flex-row items-center gap-6">
+            <div class="relative w-36 h-36 shrink-0 flex items-center justify-center">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="56" stroke="rgba(125,139,159,0.2)" stroke-width="8" fill="none" />
+                <circle cx="70" cy="70" r="46" stroke="rgba(var(--accent-rgb),0.15)" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+                <circle
+                  id="biocompat-progress-circle"
+                  cx="70"
+                  cy="70"
+                  r="56"
+                  stroke="var(--accent-secondary)"
+                  stroke-width="8"
+                  stroke-linecap="round"
+                  fill="none"
+                  stroke-dasharray="351.86"
+                  stroke-dashoffset="351.86"
+                  style="transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.35s ease; filter: drop-shadow(0 0 8px rgba(var(--accent-secondary-rgb), 0.55));"
+                />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="font-mono font-bold text-2xl text-titanium">99.98%</span>
+                <span class="font-mono text-[9px] tracking-widest uppercase text-accent-sec">BIOCOMPAT</span>
+              </div>
+            </div>
+
+            <div class="space-y-2.5 text-xs text-slateMuted flex-1 w-full">
+              <div class="p-2.5 rounded-lg bg-carbon border border-accent/35 flex justify-between font-mono">
+                <span>IMMUNE RESPONSE</span>
+                <span class="text-accent-sec font-semibold">0.002%</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-carbon border border-accent/35 flex justify-between font-mono">
+                <span>COATING MATRIX</span>
+                <span class="text-titanium font-semibold">BIO-GRAPHENE</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-carbon border border-accent/35 flex justify-between font-mono">
+                <span>TISSUE BONDING</span>
+                <span class="text-accent font-semibold">14 DAYS</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-xs text-slateMuted leading-relaxed pt-3 border-t border-accent">
+            Every cranial and sub-dermal interface uses stem-seeded carbon lattice sheathing for seamless vascular integration without immunosuppressants.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 5: INTERACTIVE "RIG CONFIGURATOR" (BUILD YOUR CYBERNETIC PROFILE)
+       ========================================================================= -->
+  <section id="configurator" class="relative py-20 sm:py-28 border-b border-accent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="reveal flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+        <div>
+          <p class="font-mono text-xs tracking-[0.22em] text-accent uppercase mb-2.5">03 // CUSTOM LOADOUT BUILDER</p>
+          <h2 class="font-display font-bold text-3xl sm:text-5xl uppercase tracking-tight text-titanium">
+            Rig <span class="text-accent">Configurator</span>
+          </h2>
+        </div>
+        <p class="max-w-xl text-sm sm:text-base text-slateMuted leading-relaxed">
+          Toggle any combination of six Gen-IX modules to compile your personal cybernetic profile. Power autonomy, reaction latency, and operator classification update in real time.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left 7 Columns: 6 Toggleable Augmentation Module Cards -->
+        <div id="rig-modules-grid" class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Right 5 Columns: Live Sticky Summary Dashboard -->
+        <aside class="lg:col-span-5 lg:sticky lg:top-24 hud-panel hud-brackets p-6 sm:p-7 min-w-0">
+          <div class="flex items-center justify-between pb-4 border-b border-accent">
+            <div>
+              <div class="font-mono text-[10px] tracking-[0.2em] text-accent uppercase">LIVE PROFILE TELEMETRY</div>
+              <h3 class="font-display font-bold text-xl sm:text-2xl text-titanium mt-0.5">Compiled Chassis</h3>
+            </div>
+            <span id="rig-class-badge" class="px-3 py-1 rounded-full border border-accent-strong bg-accent-soft font-mono text-[11px] font-bold tracking-widest uppercase text-accent">
+              VANGUARD
+            </span>
+          </div>
+
+          <!-- Cybernetic Integration Index Segmented Bar -->
+          <div class="mt-6">
+            <div class="flex items-end justify-between mb-2">
+              <span class="font-mono text-[11px] uppercase tracking-wider text-slateMuted">Cybernetic Integration</span>
+              <span id="rig-integration-pct" class="font-mono font-bold text-2xl text-titanium">42%</span>
+            </div>
+            <div id="rig-segmented-bar" class="grid grid-cols-12 gap-1.5 h-3.5"></div>
+            <div class="flex justify-between font-mono text-[9px] text-slateMuted uppercase mt-1.5">
+              <span>Human-First</span>
+              <span>Hybrid</span>
+              <span>Full-Borg</span>
+            </div>
+          </div>
+
+          <!-- Live Calculated Telemetry Readouts -->
+          <div class="mt-6 grid grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-carbon border border-accent/40">
+              <div class="font-mono text-[10px] text-slateMuted uppercase">Power Load</div>
+              <div id="rig-power-load" class="font-mono text-lg font-bold text-accent mt-1">38 W</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-carbon border border-accent/40">
+              <div class="font-mono text-[10px] text-slateMuted uppercase">Battery Autonomy</div>
+              <div id="rig-autonomy" class="font-mono text-lg font-bold text-accent-sec mt-1">112 HRS</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-carbon border border-accent/40">
+              <div class="font-mono text-[10px] text-slateMuted uppercase">Reaction Time</div>
+              <div id="rig-reaction" class="font-mono text-lg font-bold text-titanium mt-1">14.4 ms</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-carbon border border-accent/40">
+              <div class="font-mono text-[10px] text-slateMuted uppercase">Added Mass</div>
+              <div id="rig-weight" class="font-mono text-lg font-bold text-titanium mt-1">1.12 KG</div>
+            </div>
+          </div>
+
+          <!-- Active Modules Summary Chips -->
+          <div class="mt-6">
+            <div class="flex items-center justify-between font-mono text-[10px] text-slateMuted uppercase mb-2">
+              <span>INSTALLED SUBSYSTEMS</span>
+              <button type="button" onclick="resetRigConfigurator()" class="text-accent hover:underline">Reset</button>
+            </div>
+            <div id="rig-selected-list" class="flex flex-wrap gap-1.5 min-h-[30px]"></div>
+          </div>
+
+          <!-- Carry Configuration Directly to Biometric Calibration Modal -->
+          <button
+            type="button"
+            onclick="openCalibrationFromRig()"
+            class="chamfer-btn w-full mt-6 py-4 bg-accent text-carbon font-display font-bold text-xs sm:text-sm tracking-[0.16em] uppercase hover:brightness-110 flex items-center justify-center gap-2"
+            style="box-shadow: var(--glow-soft);"
+          >
+            <span>Calibrate Selected Rig</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 7: RESPONSIVE FOOTER & TELEMETRY STATUS BAR
+       ========================================================================= -->
+  <footer class="relative bg-[#04060A] pt-16 pb-8 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-accent">
+        <!-- Brand Column -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg border border-accent bg-gunmetal flex items-center justify-center">
+              <svg class="w-6 h-6" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" stroke="var(--accent)" stroke-width="1.5" />
+                <circle cx="18" cy="18" r="3.5" fill="var(--accent-secondary)" />
+              </svg>
+            </div>
+            <span class="font-display font-bold tracking-[0.16em] text-lg text-titanium">SYNAPSE <span class="text-accent">//</span> IX</span>
+          </div>
+          <p class="text-sm text-slateMuted leading-relaxed max-w-sm">
+            Humanity, Recompiled. Independent cybernetics architecture studio pioneering biocompatible prosthetics and deterministic neural interfaces.
+          </p>
+          <div class="font-mono text-[11px] text-accent space-y-1">
+            <div>LAB-04 // 35.6762° N, 139.6503° E (NEO-TOKYO)</div>
+            <div class="text-slateMuted">LAB-09 // 18.5204° N, 73.8567° E (PUNE SYNTH HUB)</div>
+          </div>
+        </div>
+
+        <!-- Studio Links -->
+        <div class="lg:col-span-2">
+          <h4 class="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-4">Subsystems</h4>
+          <ul class="space-y-2.5 text-sm text-slateMuted">
+            <li><a href="#overview" class="hover:text-titanium transition-colors">Overview</a></li>
+            <li><a href="#anatomy-lab" class="hover:text-titanium transition-colors">Anatomy Lab</a></li>
+            <li><a href="#architecture" class="hover:text-titanium transition-colors">SYNAPSE-OS</a></li>
+            <li><a href="#configurator" class="hover:text-titanium transition-colors">Rig Configurator</a></li>
+          </ul>
+        </div>
+
+        <!-- Protocols -->
+        <div class="lg:col-span-2">
+          <h4 class="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-4">Protocols</h4>
+          <ul class="space-y-2.5 text-sm text-slateMuted">
+            <li><button type="button" onclick="openCalibrationModal()" class="hover:text-titanium transition-colors">Biometric Sync</button></li>
+            <li><button type="button" onclick="toggleHudMode()" class="hover:text-titanium transition-colors">Overclock Mode</button></li>
+            <li><a href="#architecture" class="hover:text-titanium transition-colors">ISO-IX Biosafety</a></li>
+            <li><a href="#anatomy-lab" class="hover:text-titanium transition-colors">Clinical Telemetry</a></li>
+          </ul>
+        </div>
+
+        <!-- Dispatch / Newsletter Signup -->
+        <div class="lg:col-span-4">
+          <h4 class="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-3">Encrypted Dispatch</h4>
+          <p class="text-xs text-slateMuted mb-4 leading-relaxed">
+            Receive firmware release notes, surgical slot openings, and Gen-X prototype blueprints.
+          </p>
+          <form id="dispatch-form" class="flex flex-col sm:flex-row gap-2.5" onsubmit="handleDispatchSubmit(event)">
+            <input
+              id="dispatch-email"
+              type="email"
+              required
+              placeholder="operator@synapse-ix.io"
+              aria-label="Email address for encrypted dispatch"
+              class="flex-1 min-w-0 px-4 py-3 rounded-xl bg-gunmetal border border-accent text-sm text-titanium placeholder:text-slateMuted/70 focus:outline-none focus:border-accent-strong"
+            />
+            <button
+              type="submit"
+              class="chamfer-btn shrink-0 px-5 py-3 bg-accent text-carbon font-display font-bold text-xs tracking-widest uppercase hover:brightness-110"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Bottom Telemetry Status Bar with Live UTC & IST Clocks -->
+      <div class="pt-6 flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-[11px] text-slateMuted">
+        <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+          <span>© 2026 SYNAPSE // IX LABS</span>
+          <span class="text-accent/40">|</span>
+          <span id="footer-mode-status" class="text-accent">MODE: NEURAL</span>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-accent-sec"></span>
+            <span class="text-slateMuted">UTC:</span>
+            <span id="clock-utc" class="text-titanium font-semibold">00:00:00</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-slateMuted">IST:</span>
+            <span id="clock-ist" class="text-accent font-semibold">00:00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       SECTION 6: INTERACTIVE "BIOMETRIC CALIBRATION" 3-STEP MODAL
+       ========================================================================= -->
+  <div id="calibration-modal" class="fixed inset-0 z-[95] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="calib-modal-title">
+    <div id="calibration-backdrop" class="absolute inset-0 bg-carbon/85 backdrop-blur-md"></div>
+
+    <div class="relative z-10 w-full max-w-xl max-h-[92vh] overflow-y-auto hud-panel hud-brackets p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.85)]">
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-4 pb-5 border-b border-accent">
+        <div>
+          <div class="font-mono text-[10px] tracking-[0.22em] text-accent uppercase">SYNAPSE // IX CLEARANCE PROTOCOL</div>
+          <h3 id="calib-modal-title" class="font-display font-bold text-2xl text-titanium uppercase mt-1">
+            Biometric Calibration
+          </h3>
+        </div>
+        <button type="button" onclick="closeCalibrationModal()" aria-label="Close Calibration Modal" class="p-2 rounded-xl border border-accent bg-carbon text-slateMuted hover:text-titanium hover:border-accent-strong">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+
+      <!-- Step Progress Indicator -->
+      <div class="mt-5 grid grid-cols-3 gap-2 font-mono text-[10px] uppercase tracking-wider">
+        <div id="step-ind-1" class="p-2 rounded-lg border border-accent-strong bg-accent-soft text-accent text-center font-semibold">01 // Identity</div>
+        <div id="step-ind-2" class="p-2 rounded-lg border border-accent/30 bg-carbon text-slateMuted text-center">02 // Bio-Scan</div>
+        <div id="step-ind-3" class="p-2 rounded-lg border border-accent/30 bg-carbon text-slateMuted text-center">03 // Pass</div>
+      </div>
+
+      <!-- STEP 1: Callsign & Augmentation Track Selection -->
+      <div id="calib-step-1" class="mt-6 space-y-5">
+        <div>
+          <label for="calib-callsign" class="block font-mono text-[11px] tracking-widest uppercase text-slateMuted mb-2">Operator Callsign / Name</label>
+          <input
+            id="calib-callsign"
+            type="text"
+            maxlength="28"
+            value="NOVA-09"
+            placeholder="Enter Callsign or Name"
+            class="w-full px-4 py-3 rounded-xl bg-carbon border border-accent text-titanium font-mono text-sm focus:outline-none focus:border-accent-strong"
+          />
+        </div>
+
+        <div>
+          <label for="calib-track" class="block font-mono text-[11px] tracking-widest uppercase text-slateMuted mb-2">Primary Augmentation Track</label>
+          <select id="calib-track" class="w-full px-4 py-3 rounded-xl bg-carbon border border-accent text-titanium font-mono text-sm focus:outline-none focus:border-accent-strong">
+            <option value="Custom Rig Loadout">Custom Rig Loadout (From Configurator)</option>
+            <option value="Cranial & Ocular Recon">Cranial &amp; Ocular Recon</option>
+            <option value="Kinetic Bionic Combat">Kinetic Bionic Combat</option>
+            <option value="Metabolic Longevity Core">Metabolic Longevity Core</option>
+          </select>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-carbon border border-accent/40">
+          <div class="font-mono text-[10px] text-slateMuted uppercase mb-1.5">LOCKED RIG MODULES</div>
+          <div id="calib-rig-preview" class="flex flex-wrap gap-1.5 font-mono text-[10px]"></div>
+        </div>
+
+        <button
+          type="button"
+          onclick="goToCalibStep(2)"
+          class="chamfer-btn w-full py-3.5 bg-accent text-carbon font-display font-bold text-xs tracking-[0.18em] uppercase hover:brightness-110"
+        >
+          Proceed to Biometric Scan →
+        </button>
+      </div>
+
+      <!-- STEP 2: Interactive Hold-to-Scan / Click-to-Scan Biometrics -->
+      <div id="calib-step-2" class="hidden mt-6 text-center space-y-5">
+        <p class="text-xs sm:text-sm text-slateMuted">
+          Press and <span class="text-titanium font-semibold">hold the biometric scanner</span> (or click Auto-Scan) to verify cortical compatibility and vascular impedance.
+        </p>
+
+        <!-- Animated SVG Iris / Fingerprint Scanner -->
+        <div class="relative mx-auto w-44 h-44 rounded-2xl bg-[#04060A] border border-accent flex items-center justify-center overflow-hidden select-none">
+          <svg class="w-32 h-32" viewBox="0 0 140 140" fill="none" aria-hidden="true">
+            <circle cx="70" cy="70" r="56" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="6 4" stroke-opacity="0.7" />
+            <circle cx="70" cy="70" r="42" stroke="var(--accent-secondary)" stroke-width="1.2" stroke-opacity="0.65" />
+            <path d="M44 70 C44 54, 56 44, 70 44 C84 44, 96 54, 96 70 C96 86, 84 96, 70 96" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" />
+            <path d="M54 70 C54 60, 61 54, 70 54 C79 54, 86 60, 86 70 C86 80, 79 86, 70 86" stroke="var(--accent-secondary)" stroke-width="1.6" stroke-linecap="round" />
+            <circle cx="70" cy="70" r="8" fill="rgba(var(--accent-rgb),0.25)" stroke="var(--accent)" stroke-width="1.5" />
+            <circle cx="70" cy="70" r="2.5" fill="var(--accent-secondary)" />
+          </svg>
+          <!-- Laser Line -->
+          <div id="calib-scan-laser" class="hidden absolute left-2 right-2 top-0 h-[2.5px]" style="background: linear-gradient(90deg, transparent, var(--accent), transparent); box-shadow: 0 0 12px var(--accent);"></div>
+        </div>
+
+        <!-- Scan Progress Bar -->
+        <div class="max-w-sm mx-auto">
+          <div class="flex justify-between font-mono text-[11px] mb-1.5">
+            <span id="scan-status-text" class="text-slateMuted uppercase">AWAITING BIOMETRIC CONTACT</span>
+            <span id="scan-pct-text" class="text-accent font-bold">0%</span>
+          </div>
+          <div class="h-2.5 rounded-full bg-carbon border border-accent/40 overflow-hidden">
+            <div id="scan-progress-bar" class="h-full w-0 transition-[width] duration-75" style="background: linear-gradient(90deg, var(--accent), var(--accent-secondary));"></div>
+          </div>
+        </div>
+
+        <!-- Dual Controls: Hold-to-Scan + Accessible One-Tap Auto-Scan -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+          <button
+            id="hold-scan-btn"
+            type="button"
+            class="chamfer-btn w-full sm:w-auto px-7 py-3.5 bg-accent text-carbon font-display font-bold text-xs tracking-[0.16em] uppercase select-none touch-none"
+          >
+            Hold to Scan Biometrics
+          </button>
+          <button
+            type="button"
+            onclick="startAutoBiometricScan()"
+            class="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-accent bg-carbon text-titanium hover:text-accent font-mono text-xs tracking-wider uppercase"
+          >
+            Click Auto-Scan
+          </button>
+        </div>
+
+        <button type="button" onclick="goToCalibStep(1)" class="font-mono text-[11px] text-slateMuted hover:text-titanium uppercase underline underline-offset-4">
+          ← Edit Callsign
+        </button>
+      </div>
+
+      <!-- STEP 3: Personalized SYNAPSE // IX Neural Clearance Pass -->
+      <div id="calib-step-3" class="hidden mt-6 space-y-5">
+        <div class="chamfer-card relative p-5 sm:p-6 bg-[#04060A] border border-accent-strong overflow-hidden" style="box-shadow: var(--glow-soft);">
+          <!-- Subtle Decorative Watermark -->
+          <svg class="absolute -right-10 -bottom-10 w-44 h-44 opacity-15 pointer-events-none" viewBox="0 0 160 160" fill="none" aria-hidden="true">
+            <polygon points="80,10 140,45 140,115 80,150 20,115 20,45" stroke="var(--accent)" stroke-width="2" />
+            <circle cx="80" cy="80" r="38" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-dasharray="5 4" />
+          </svg>
+
+          <!-- Pass Header -->
+          <div class="relative z-10 flex items-start justify-between gap-3 pb-4 border-b border-accent">
+            <div>
+              <div class="font-display font-bold tracking-[0.16em] text-sm text-titanium">SYNAPSE <span class="text-accent">//</span> IX</div>
+              <div class="font-mono text-[9px] tracking-[0.22em] text-accent-sec uppercase mt-0.5">NEURAL CLEARANCE PASS // VERIFIED</div>
+            </div>
+            <div class="text-right font-mono">
+              <div class="text-[9px] text-slateMuted uppercase">SERIAL ID</div>
+              <div id="pass-serial-id" class="text-xs sm:text-sm font-bold text-accent">SYNX-IX-8492-A</div>
+            </div>
+          </div>
+
+          <!-- Pass Operator Details -->
+          <div class="relative z-10 py-5 grid grid-cols-2 gap-4">
+            <div>
+              <div class="font-mono text-[9px] text-slateMuted uppercase">CALLSIGN</div>
+              <div id="pass-callsign" class="font-display font-bold text-2xl text-titanium uppercase truncate mt-0.5">NOVA-09</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] text-slateMuted uppercase">COMPATIBILITY</div>
+              <div id="pass-compat" class="font-mono font-bold text-2xl text-accent-sec mt-0.5">99.96%</div>
+            </div>
+            <div>
+              <div class="font-mono text-[9px] text-slateMuted uppercase">OPERATOR CLASS</div>
+              <div id="pass-class" class="font-mono text-xs font-semibold text-accent uppercase mt-0.5">VANGUARD</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] text-slateMuted uppercase">PRIMARY TRACK</div>
+              <div id="pass-track" class="font-mono text-xs text-titanium truncate mt-0.5">Custom Rig Loadout</div>
+            </div>
+          </div>
+
+          <!-- Configured Rig Modules + Crisp SVG Barcode -->
+          <div class="relative z-10 pt-4 border-t border-accent flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="font-mono text-[9px] text-slateMuted uppercase mb-1.5">AUTHORIZED AUGMENTS</div>
+              <div id="pass-modules" class="flex flex-wrap gap-1.5 font-mono text-[10px]"></div>
+            </div>
+            <div class="shrink-0">
+              <svg id="pass-barcode" class="h-9 w-36" viewBox="0 0 144 36" fill="none" aria-label="Clearance Serial Barcode"></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pass Actions -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onclick="copyClearanceSerial()"
+            class="chamfer-btn flex-1 py-3.5 bg-accent text-carbon font-display font-bold text-xs tracking-[0.16em] uppercase hover:brightness-110"
+          >
+            Copy Clearance ID
+          </button>
+          <button
+            type="button"
+            onclick="resetCalibration()"
+            class="px-5 py-3.5 rounded-xl border border-accent bg-carbon text-slateMuted hover:text-titanium font-mono text-xs tracking-wider uppercase"
+          >
+            Reset Scan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       VANILLA JAVASCRIPT ENGINE — ZERO EXTERNAL JS DEPENDENCIES
+       ========================================================================= -->
+  <script>
+    'use strict';
+
+    /* -------------------------------------------------------------------------
+       1. GLOBAL CYBERNETICS DATA STORE
+       ------------------------------------------------------------------------- */
+    const ANATOMY_MODULES = [
+      {
+        id: 'optic',
+        code: 'OPTIC-V4',
+        slot: 'CRANIAL VISUAL ARRAY',
+        name: 'Ocular Optics',
+        x: 206,
+        y: 88,
+        desc: 'Multi-spectral synthetic retina featuring real-time AR thermal overlay, 40x stabilized optical zoom, and an ultra-low 0.2ms direct optic-nerve feed.',
+        specs: ['AR Thermal Overlay', '40x Optical Zoom', '0.2ms Direct Feed', 'Night-Vision Gain'],
+        stats: { precision: 99, efficiency: 94, durability: 88, sync: 99.7 },
+        baseLoad: 22,
+        baseWatts: 8.4,
+        baseTemp: 36.6
+      },
+      {
+        id: 'cortex',
+        code: 'CORTEX-LINK',
+        slot: 'PREFRONTAL BCI BRIDGE',
+        name: 'Neural Cortex Bridge',
+        x: 190,
+        y: 52,
+        desc: '128-channel bidirectional brain-computer interface with zero-lag motor intent decoding, encrypted sub-vocal comms, and hardware memory indexing.',
+        specs: ['128-Ch Bidirectional BCI', 'Zero-Lag Decoding', 'Quantum-Encrypted Bus', 'Sub-Vocal Link'],
+        stats: { precision: 98, efficiency: 91, durability: 93, sync: 99.9 },
+        baseLoad: 31,
+        baseWatts: 12.6,
+        baseTemp: 37.1
+      },
+      {
+        id: 'reactor',
+        code: 'BIO-REACTOR',
+        slot: 'THORACIC POWER CORE',
+        name: 'Cardio-Pulse Core',
+        x: 190,
+        y: 220,
+        desc: 'Closed-loop kinetic energy harvesting core integrated with coronary hemodynamics. Delivers 18-year autonomous power alongside continuous metabolic telemetry.',
+        specs: ['Kinetic Harvesting', '18-Yr Solid-State Cell', 'Metabolic Telemetry', 'Zero-Leak Seal'],
+        stats: { precision: 95, efficiency: 99, durability: 97, sync: 99.5 },
+        baseLoad: 18,
+        baseWatts: 4.5,
+        baseTemp: 36.9
+      },
+      {
+        id: 'arm',
+        code: 'KINETIC-ARM Mk.VII',
+        slot: 'RIGHT UPPER LIMB',
+        name: 'Bionic Upper Limb',
+        x: 312,
+        y: 278,
+        desc: 'Carbon-titanium myoelectric limb embedded with 1,200 tactile haptic sensors, adaptive micro-tremor cancellation, and a calibrated 450N precision grip.',
+        specs: ['1,200 Haptic Sensors', '450N Titanium Grip', 'Micro-Servo Tendons', '0.3ms Tactile Return'],
+        stats: { precision: 97, efficiency: 89, durability: 98, sync: 99.2 },
+        baseLoad: 27,
+        baseWatts: 18.0,
+        baseTemp: 37.4
+      },
+      {
+        id: 'derma',
+        code: 'DERMA-TITAN',
+        slot: 'SUB-DERMAL THORAX',
+        name: 'Sub-Dermal Exo-Weave',
+        x: 146,
+        y: 242,
+        desc: 'Ultra-thin carbon-graphene impact dispersion lattice woven beneath the dermis. Provides active Peltier thermoregulation and ballistic shear resistance.',
+        specs: ['Carbon-Graphene Mesh', 'Active Thermoregulation', '1.2mm Thin Profile', 'Stem-Seeded Sheath'],
+        stats: { precision: 92, efficiency: 96, durability: 99, sync: 99.4 },
+        baseLoad: 15,
+        baseWatts: 6.2,
+        baseTemp: 36.4
+      }
+    ];
+
+    const RIG_MODULES = [
+      {
+        id: 'optic',
+        code: 'OPTIC-V4',
+        name: 'Ocular Optics',
+        role: 'AR Thermal + 40x Zoom',
+        watts: 8,
+        latencyDelta: -18,
+        weightGrams: 110,
+        integration: 12,
+        defaultOn: true
+      },
+      {
+        id: 'cortex',
+        code: 'CORTEX-LINK',
+        name: 'Neural Cortex Bridge',
+        role: '128-Ch Bidirectional BCI',
+        watts: 14,
+        latencyDelta: -68,
+        weightGrams: 85,
+        integration: 18,
+        defaultOn: true
+      },
+      {
+        id: 'reactor',
+        code: 'BIO-REACTOR',
+        name: 'Cardio-Pulse Core',
+        role: 'Kinetic Harvesting (+Autonomy)',
+        watts: -12, // Generates surplus power
+        latencyDelta: -10,
+        weightGrams: 420,
+        integration: 16,
+        defaultOn: false
+      },
+      {
+        id: 'arm',
+        code: 'KINETIC-ARM Mk.VII',
+        name: 'Bionic Upper Limb',
+        role: '450N Grip + 1,200 Haptics',
+        watts: 22,
+        latencyDelta: -24,
+        weightGrams: 1350,
+        integration: 19,
+        defaultOn: true
+      },
+      {
+        id: 'derma',
+        code: 'DERMA-TITAN',
+        name: 'Sub-Dermal Exo-Weave',
+        role: 'Graphene Impact Matrix',
+        watts: 6,
+        latencyDelta: -6,
+        weightGrams: 640,
+        integration: 11,
+        defaultOn: false
+      },
+      {
+        id: 'spine',
+        code: 'REFLEX-SPINE S9',
+        name: 'Myoelectric Spine Bus',
+        role: 'Reflex Arc Overdrive',
+        watts: 18,
+        latencyDelta: -42,
+        weightGrams: 510,
+        integration: 14,
+        defaultOn: false
+      }
+    ];
+
+    /* -------------------------------------------------------------------------
+       2. APPLICATION STATE
+       ------------------------------------------------------------------------- */
+    const state = {
+      hudMode: 'neural', // 'neural' | 'overclock'
+      activeAnatomyId: 'optic',
+      stressTestActive: false,
+      stressInterval: null,
+      waveState: 'rest', // 'rest' | 'combat'
+      waveGain: 4,
+      selectedRigIds: new Set(RIG_MODULES.filter((m) => m.defaultOn).map((m) => m.id)),
+      clearanceSerial: 'SYNX-IX-8492-A',
+      scanProgress: 0,
+      scanHolding: false,
+      scanAutoRunning: false,
+      scanRaf: null
+    };
+
+    /* Helper: Read live CSS theme colors for Canvas rendering */
+    function getThemePalette() {
+      const isOverclock = state.hudMode === 'overclock';
+      return {
+        accent: isOverclock ? '#FF2E5B' : '#00F0FF',
+        accentRgb: isOverclock ? '255, 46, 91' : '0, 240, 255',
+        secondary: isOverclock ? '#FFB020' : '#00FF94',
+        secondaryRgb: isOverclock ? '255, 176, 32' : '0, 255, 148',
+        titanium: '#E6EDF5',
+        muted: '#7D8B9F'
+      };
+    }
+
+    /* -------------------------------------------------------------------------
+       3. HUD MODE TOGGLE ("NEURAL" VS "OVERCLOCK")
+       ------------------------------------------------------------------------- */
+    function toggleHudMode() {
+      state.hudMode = state.hudMode === 'neural' ? 'overclock' : 'neural';
+      document.documentElement.setAttribute('data-hud-mode', state.hudMode);
+
+      const isOverclock = state.hudMode === 'overclock';
+      const label = document.getElementById('mode-toggle-label');
+      const alt = document.getElementById('mode-toggle-alt');
+      const badge = document.getElementById('nav-mode-badge');
+      const footerStatus = document.getElementById('footer-mode-status');
+
+      if (label) label.textContent = isOverclock ? 'OVERCLOCK' : 'NEURAL';
+      if (alt) alt.textContent = isOverclock ? 'NEURAL' : 'OVERCLOCK';
+      if (badge) badge.textContent = isOverclock ? 'OVERCLOCK' : 'NEURAL';
+      if (footerStatus) footerStatus.textContent = isOverclock ? 'MODE: OVERCLOCK' : 'MODE: NEURAL';
+
+      // Refresh SVG highlights that depend on theme
+      renderAnatomyHotspots();
+      renderHapticHexGrid();
+
+      showToast(
+        isOverclock
+          ? 'OVERCLOCK MODE ENGAGED // Crimson telemetry & high-gain optics active.'
+          : 'NEURAL MODE RESTORED // Balanced cyan synchronicity nominal.'
+      );
+    }
+
+    /* -------------------------------------------------------------------------
+       4. LIVE NAVBAR BIOMETRIC SYNC JITTER & FOOTER UTC/IST CLOCK
+       ------------------------------------------------------------------------- */
+    function initLiveTelemetryClocks() {
+      const navSync = document.getElementById('nav-sync-val');
+      const mobSync = document.getElementById('mobile-sync-val');
+      const utcEl = document.getElementById('clock-utc');
+      const istEl = document.getElementById('clock-ist');
+
+      function updateClocks() {
+        const now = new Date();
+        if (utcEl) {
+          utcEl.textContent = now.toISOString().substring(11, 19);
+        }
+        if (istEl) {
+          const istString = now.toLocaleTimeString('en-GB', {
+            timeZone: 'Asia/Kolkata',
+            hour12: false
+          });
+          istEl.textContent = istString;
+        }
+      }
+
+      setInterval(() => {
+        const base = state.hudMode === 'overclock' ? 99.6 : 99.3;
+        const val = (base + Math.random() * 0.35).toFixed(1) + '%';
+        if (navSync) navSync.textContent = val;
+        if (mobSync) mobSync.textContent = `${val} ${state.hudMode === 'overclock' ? 'OVERCLOCK' : 'NOMINAL'}`;
+      }, 2400);
+
+      updateClocks();
+      setInterval(updateClocks, 1000);
+    }
+
+    /* -------------------------------------------------------------------------
+       5. HERO 60FPS HTML5 CANVAS — CYBERNETIC EYE & CRANIAL NEURAL LATTICE
+       Tracks cursor & touch coordinates smoothly with rotating HUD rings
+       ------------------------------------------------------------------------- */
+    function initHeroCyberEyeCanvas() {
+      const canvas = document.getElementById('cyber-eye-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const coordsEl = document.getElementById('eye-coords');
+      const apertureEl = document.getElementById('eye-aperture');
+      const freqEl = document.getElementById('eye-freq');
+      const lockEl = document.getElementById('eye-lock');
+      const hudStatusEl = document.getElementById('hero-hud-status');
+
+      let width = 0;
+      let height = 0;
+      let pointer = { x: 0.5, y: 0.5, active: false };
+      let smoothLook = { x: 0, y: 0 };
+
+      // Radiating neural-lattice synapse nodes
+      const synapseNodes = Array.from({ length: 34 }, (_, i) => {
+        const angle = (i / 34) * Math.PI * 2 + (Math.random() - 0.5) * 0.25;
+        const radiusFactor = 0.27 + (i % 4) * 0.068 + Math.random() * 0.04;
+        return {
+          baseAngle: angle,
+          radiusFactor,
+          speed: (i % 2 === 0 ? 1 : -1) * (0.0014 + Math.random() * 0.0022),
+          size: i % 5 === 0 ? 2.6 : 1.5,
+          phase: Math.random() * Math.PI * 2
+        };
+      });
+
+      function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = Math.max(100, rect.width);
+        height = Math.max(100, rect.height);
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      const ro = new ResizeObserver(resize);
+      ro.observe(canvas.parentElement);
+      resize();
+
+      function updatePointer(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const nx = (clientX - rect.left) / rect.width;
+        const ny = (clientY - rect.top) / rect.height;
+        pointer.x = Math.max(0, Math.min(1, nx));
+        pointer.y = Math.max(0, Math.min(1, ny));
+        pointer.active = true;
+
+        if (coordsEl) {
+          const px = String(Math.round(pointer.x * 999)).padStart(3, '0');
+          const py = String(Math.round(pointer.y * 999)).padStart(3, '0');
+          coordsEl.textContent = `X: ${px} // Y: ${py}`;
+        }
+        if (lockEl) lockEl.textContent = 'TARGET LOCK';
+        if (hudStatusEl) hudStatusEl.textContent = 'CURSOR LOCK: ACTIVE';
+      }
+
+      canvas.addEventListener('pointermove', (e) => updatePointer(e.clientX, e.clientY));
+      canvas.addEventListener('pointerdown', (e) => updatePointer(e.clientX, e.clientY));
+      canvas.addEventListener('pointerleave', () => {
+        pointer.active = false;
+        if (lockEl) lockEl.textContent = 'NOMINAL';
+        if (hudStatusEl) hudStatusEl.textContent = 'CURSOR LOCK: STANDBY';
+      });
+
+      let t = 0;
+      let frameCounter = 0;
+
+      function render() {
+        t += state.hudMode === 'overclock' ? 0.022 : 0.012;
+        frameCounter++;
+        const palette = getThemePalette();
+
+        ctx.clearRect(0, 0, width, height);
+
+        const cx = width * 0.5;
+        const cy = height * 0.5;
+        const minDim = Math.min(width, height);
+
+        // Smooth eye pupil tracking offset
+        const targetDx = pointer.active ? (pointer.x - 0.5) * minDim * 0.12 : Math.cos(t * 0.7) * minDim * 0.025;
+        const targetDy = pointer.active ? (pointer.y - 0.5) * minDim * 0.12 : Math.sin(t * 0.9) * minDim * 0.025;
+        smoothLook.x += (targetDx - smoothLook.x) * 0.1;
+        smoothLook.y += (targetDy - smoothLook.y) * 0.1;
+
+        const eyeX = cx + smoothLook.x;
+        const eyeY = cy + smoothLook.y;
+
+        // Subtle radial ambient iris glow
+        const glow = ctx.createRadialGradient(eyeX, eyeY, minDim * 0.02, cx, cy, minDim * 0.48);
+        glow.addColorStop(0, `rgba(${palette.accentRgb}, 0.26)`);
+        glow.addColorStop(0.45, `rgba(${palette.accentRgb}, 0.06)`);
+        glow.addColorStop(1, 'rgba(5, 7, 11, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+
+        // Static tactical crosshair guides
+        ctx.strokeStyle = `rgba(${palette.accentRgb}, 0.12)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx, 14);
+        ctx.lineTo(cx, height - 14);
+        ctx.moveTo(14, cy);
+        ctx.lineTo(width - 14, cy);
+        ctx.stroke();
+
+        // Outer Rotating Graduated Ring
+        const outerR = minDim * 0.41;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(t * 0.32);
+        ctx.strokeStyle = `rgba(${palette.accentRgb}, 0.35)`;
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([8, 6, 2, 6]);
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Degree Tick Marks
+        for (let i = 0; i < 36; i++) {
+          const a = (i / 36) * Math.PI * 2;
+          const inner = i % 3 === 0 ? outerR - 10 : outerR - 5;
+          ctx.strokeStyle = i % 9 === 0 ? palette.secondary : `rgba(${palette.accentRgb}, 0.45)`;
+          ctx.lineWidth = i % 9 === 0 ? 1.8 : 1;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * inner, Math.sin(a) * inner);
+          ctx.lineTo(Math.cos(a) * outerR, Math.sin(a) * outerR);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Counter-Rotating Segmented Arc Ring
+        const midR = minDim * 0.32;
+        ctx.save();
+        ctx.translate(cx + smoothLook.x * 0.3, cy + smoothLook.y * 0.3);
+        ctx.rotate(-t * 0.55);
+        for (let s = 0; s < 4; s++) {
+          const start = s * (Math.PI / 2) + 0.18;
+          const end = start + Math.PI / 3;
+          ctx.strokeStyle = s % 2 === 0 ? palette.accent : `rgba(${palette.secondaryRgb}, 0.7)`;
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.arc(0, 0, midR, start, end);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Radiating Synapse Lattice Nodes + Mesh Connections
+        const nodePositions = synapseNodes.map((n) => {
+          n.baseAngle += n.speed * (state.hudMode === 'overclock' ? 1.8 : 1);
+          const r = minDim * n.radiusFactor + Math.sin(t * 2 + n.phase) * 4;
+          return {
+            x: cx + Math.cos(n.baseAngle) * r + smoothLook.x * 0.25,
+            y: cy + Math.sin(n.baseAngle) * r + smoothLook.y * 0.25,
+            size: n.size
+          };
+        });
+
+        // Connect adjacent synapse nodes & link nearby ones to the moving iris
+        for (let i = 0; i < nodePositions.length; i++) {
+          const a = nodePositions[i];
+          for (let j = i + 1; j < nodePositions.length; j++) {
+            const b = nodePositions[j];
+            const dist = Math.hypot(a.x - b.x, a.y - b.y);
+            if (dist < minDim * 0.19) {
+              ctx.strokeStyle = `rgba(${palette.accentRgb}, ${(1 - dist / (minDim * 0.19)) * 0.22})`;
+              ctx.lineWidth = 0.8;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+
+          // Connect node to iris perimeter
+          const distToEye = Math.hypot(a.x - eyeX, a.y - eyeY);
+          if (distToEye < minDim * 0.28) {
+            ctx.strokeStyle = `rgba(${palette.secondaryRgb}, ${(1 - distToEye / (minDim * 0.28)) * 0.28})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(eyeX, eyeY);
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = i % 4 === 0 ? palette.secondary : palette.accent;
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, a.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Dynamic Cybernetic Iris & Mechanical Aperture Blades
+        const aperturePulse = 0.5 + 0.5 * Math.sin(t * 1.9);
+        const irisR = minDim * (0.175 + (pointer.active ? 0.015 : 0));
+        const pupilR = minDim * (0.068 + aperturePulse * 0.018);
+
+        // Iris Ring
+        ctx.strokeStyle = palette.accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(eyeX, eyeY, irisR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Radial Iris Filaments
+        for (let f = 0; f < 24; f++) {
+          const a = (f / 24) * Math.PI * 2 + t * 0.4;
+          ctx.strokeStyle = f % 4 === 0 ? `rgba(${palette.secondaryRgb}, 0.7)` : `rgba(${palette.accentRgb}, 0.35)`;
+          ctx.lineWidth = f % 4 === 0 ? 1.5 : 0.9;
+          ctx.beginPath();
+          ctx.moveTo(eyeX + Math.cos(a) * (pupilR + 4), eyeY + Math.sin(a) * (pupilR + 4));
+          ctx.lineTo(eyeX + Math.cos(a) * (irisR - 3), eyeY + Math.sin(a) * (irisR - 3));
+          ctx.stroke();
+        }
+
+        // Core Pupil Lens
+        const coreGrad = ctx.createRadialGradient(eyeX, eyeY, 2, eyeX, eyeY, pupilR);
+        coreGrad.addColorStop(0, '#05070B');
+        coreGrad.addColorStop(0.7, `rgba(${palette.accentRgb}, 0.35)`);
+        coreGrad.addColorStop(1, palette.accent);
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(eyeX, eyeY, pupilR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Center Specular Sensor Dot
+        ctx.fillStyle = palette.secondary;
+        ctx.beginPath();
+        ctx.arc(eyeX - pupilR * 0.22, eyeY - pupilR * 0.22, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Throttle floating text telemetry updates for crisp readability
+        if (frameCounter % 10 === 0) {
+          if (apertureEl) {
+            const pct = (58 + aperturePulse * 14 + (pointer.active ? 8 : 0)).toFixed(1);
+            apertureEl.textContent = `${pct}%`;
+          }
+          if (freqEl) {
+            const baseHz = state.hudMode === 'overclock' ? 248 : 142;
+            const hz = (baseHz + Math.sin(t * 3) * 6.4).toFixed(1);
+            freqEl.textContent = `${hz} Hz`;
+          }
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    /* -------------------------------------------------------------------------
+       6. HERO METRICS ANIMATED COUNT-UP
+       ------------------------------------------------------------------------- */
+    function initHeroMetricsCountUp() {
+      const wrap = document.getElementById('hero-metrics');
+      if (!wrap) return;
+      let started = false;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && !started) {
+            started = true;
+            wrap.querySelectorAll('.hero-count').forEach((el) => {
+              const target = parseFloat(el.dataset.target || '0');
+              const decimals = parseInt(el.dataset.decimals || '0', 10);
+              const duration = 1100;
+              const startTime = performance.now();
+
+              function step(now) {
+                const progress = Math.min(1, (now - startTime) / duration);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = (target * eased).toFixed(decimals);
+                if (progress < 1) requestAnimationFrame(step);
+              }
+              requestAnimationFrame(step);
+            });
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.25 }
+      );
+      observer.observe(wrap);
+    }
+
+    /* -------------------------------------------------------------------------
+       7. ANATOMY LAB — 5 HOTSPOTS + TELEMETRY CARD + STRESS TEST
+       ------------------------------------------------------------------------- */
+    function renderAnatomyHotspots() {
+      const group = document.getElementById('anatomy-hotspots');
+      if (!group) return;
+      const palette = getThemePalette();
+
+      group.innerHTML = ANATOMY_MODULES.map((m) => {
+        const active = m.id === state.activeAnatomyId;
+        const fill = active ? palette.secondary : palette.accent;
+        return `
+          <g
+            class="cursor-pointer focus:outline-none"
+            tabindex="0"
+            role="button"
+            aria-label="Inspect ${m.name} (${m.code})"
+            onclick="selectAnatomyModule('${m.id}')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAnatomyModule('${m.id}');}"
+          >
+            <circle cx="${m.x}" cy="${m.y}" r="14" fill="transparent" />
+            <circle cx="${m.x}" cy="${m.y}" r="8" fill="none" stroke="${fill}" stroke-width="1.5" class="hotspot-ripple" />
+            <circle cx="${m.x}" cy="${m.y}" r="${active ? 8.5 : 6}" fill="#05070B" stroke="${fill}" stroke-width="2" />
+            <circle cx="${m.x}" cy="${m.y}" r="${active ? 3.5 : 2.5}" fill="${fill}" />
+            ${
+              active
+                ? `<g pointer-events="none">
+                    <line x1="${m.x}" y1="${m.y}" x2="${m.x > 190 ? m.x - 24 : m.x + 24}" y2="${m.y - 20}" stroke="${fill}" stroke-width="1.2" />
+                    <rect x="${m.x > 190 ? m.x - 104 : m.x + 24}" y="${m.y - 31}" width="80" height="19" rx="4" fill="#05070B" stroke="${fill}" stroke-width="1" />
+                    <text x="${m.x > 190 ? m.x - 64 : m.x + 64}" y="${m.y - 18.5}" text-anchor="middle" fill="${fill}" font-family="JetBrains Mono" font-size="8.5" font-weight="600">${m.code}</text>
+                  </g>`
+                : ''
+            }
+          </g>
+        `;
+      }).join('');
+    }
+
+    function renderAnatomyTabs() {
+      const tabs = document.getElementById('anatomy-tabs');
+      if (!tabs) return;
+      tabs.innerHTML = ANATOMY_MODULES.map((m) => {
+        const active = m.id === state.activeAnatomyId;
+        return `
+          <button
+            type="button"
+            role="tab"
+            aria-selected="${active}"
+            onclick="selectAnatomyModule('${m.id}')"
+            class="px-3 py-1.5 rounded-lg font-mono text-[10px] sm:text-[11px] tracking-wider uppercase transition-all ${
+              active
+                ? 'bg-accent text-carbon font-bold'
+                : 'border border-accent bg-carbon text-slateMuted hover:text-titanium hover:border-accent-strong'
+            }"
+          >
+            ${m.code}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function updateAnatomyPanel() {
+      const mod = ANATOMY_MODULES.find((m) => m.id === state.activeAnatomyId) || ANATOMY_MODULES[0];
+      const stressBoost = state.stressTestActive;
+
+      document.getElementById('anatomy-active-tag').textContent = `NODE: ${mod.code}`;
+      document.getElementById('mod-code').textContent = mod.code;
+      document.getElementById('mod-slot').textContent = mod.slot;
+      document.getElementById('mod-title').textContent = mod.name;
+      document.getElementById('mod-desc').textContent = mod.desc;
+
+      document.getElementById('mod-specs').innerHTML = mod.specs
+        .map((s) => `<span class="px-2.5 py-1 rounded-md bg-carbon border border-accent/45 font-mono text-[10px] text-titanium">${s}</span>`)
+        .join('');
+
+      const statusPill = document.getElementById('mod-status-pill');
+      if (statusPill) {
+        statusPill.textContent = stressBoost ? 'STATUS: STRESS LOAD' : 'STATUS: OPTIMAL';
+        statusPill.style.color = stressBoost ? '#FF2E5B' : 'var(--accent-secondary)';
+        statusPill.style.borderColor = stressBoost ? 'rgba(255,46,91,0.65)' : 'var(--hairline)';
+      }
+
+      const precision = stressBoost ? Math.min(100, mod.stats.precision + 1) : mod.stats.precision;
+      const efficiency = stressBoost ? Math.max(68, mod.stats.efficiency - 14) : mod.stats.efficiency;
+      const durability = stressBoost ? Math.min(100, mod.stats.durability + 1) : mod.stats.durability;
+      const sync = stressBoost ? (mod.stats.sync - 0.1).toFixed(1) : mod.stats.sync.toFixed(1);
+
+      document.getElementById('bar-val-precision').textContent = `${precision}%`;
+      document.getElementById('bar-fill-precision').style.width = `${precision}%`;
+
+      document.getElementById('bar-val-efficiency').textContent = `${efficiency}%`;
+      document.getElementById('bar-fill-efficiency').style.width = `${efficiency}%`;
+
+      document.getElementById('bar-val-durability').textContent = `${durability}%`;
+      document.getElementById('bar-fill-durability').style.width = `${durability}%`;
+
+      document.getElementById('bar-val-sync').textContent = `${sync}%`;
+      document.getElementById('bar-fill-sync').style.width = `${sync}%`;
+
+      if (!stressBoost) {
+        document.getElementById('stress-load').textContent = `${mod.baseLoad}%`;
+        document.getElementById('stress-watts').textContent = `${mod.baseWatts.toFixed(1)} W`;
+        document.getElementById('stress-temp').textContent = `${mod.baseTemp.toFixed(1)}°C`;
+      }
+    }
+
+    function selectAnatomyModule(id) {
+      state.activeAnatomyId = id;
+      renderAnatomyHotspots();
+      renderAnatomyTabs();
+      updateAnatomyPanel();
+    }
+
+    function toggleStressTest() {
+      const btn = document.getElementById('stress-test-btn');
+      state.stressTestActive = !state.stressTestActive;
+
+      if (state.stressTestActive) {
+        btn.textContent = 'Stop Stress Test';
+        btn.classList.add('bg-signalCrimson', 'text-white');
+        updateAnatomyPanel();
+
+        const runTick = () => {
+          const mod = ANATOMY_MODULES.find((m) => m.id === state.activeAnatomyId) || ANATOMY_MODULES[0];
+          const load = Math.min(99, Math.round(82 + Math.random() * 16));
+          const watts = (mod.baseWatts * (2.6 + Math.random() * 0.45)).toFixed(1);
+          const temp = (mod.baseTemp + 4.8 + Math.random() * 2.2).toFixed(1);
+          document.getElementById('stress-load').textContent = `${load}%`;
+          document.getElementById('stress-watts').textContent = `${watts} W`;
+          document.getElementById('stress-temp').textContent = `${temp}°C`;
+        };
+        runTick();
+        state.stressInterval = setInterval(runTick, 550);
+        showToast(`Running thermal & torque stress test on ${state.activeAnatomyId.toUpperCase()}...`);
+      } else {
+        if (state.stressInterval) clearInterval(state.stressInterval);
+        state.stressInterval = null;
+        btn.textContent = 'Run Stress Test';
+        btn.classList.remove('bg-signalCrimson', 'text-white');
+        updateAnatomyPanel();
+        showToast('Stress test halted. Module telemetry returning to baseline.');
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       8. SYSTEM ARCHITECTURE: LIVE 60FPS DUAL-WAVE OSCILLOSCOPE CANVAS
+       ------------------------------------------------------------------------- */
+    function setWaveState(mode) {
+      state.waveState = mode;
+      const restBtn = document.getElementById('wave-state-rest');
+      const combatBtn = document.getElementById('wave-state-combat');
+      if (mode === 'rest') {
+        restBtn.className = 'px-3 py-1.5 rounded-md bg-accent text-carbon font-bold transition-all';
+        combatBtn.className = 'px-3 py-1.5 rounded-md text-slateMuted hover:text-titanium transition-all';
+      } else {
+        combatBtn.className = 'px-3 py-1.5 rounded-md bg-accent text-carbon font-bold transition-all';
+        restBtn.className = 'px-3 py-1.5 rounded-md text-slateMuted hover:text-titanium transition-all';
+      }
+    }
+
+    function initOscilloscopeCanvas() {
+      const canvas = document.getElementById('oscilloscope-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const slider = document.getElementById('osc-gain-slider');
+      const gainValEl = document.getElementById('osc-gain-val');
+      const bpmEl = document.getElementById('osc-bpm-readout');
+
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          state.waveGain = Number(e.target.value);
+          if (gainValEl) gainValEl.textContent = `${state.waveGain.toFixed(1)}x`;
+        });
+      }
+
+      let width = 0;
+      let height = 0;
+      function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = Math.max(120, rect.width);
+        height = Math.max(100, rect.height);
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      const ro = new ResizeObserver(resize);
+      ro.observe(canvas.parentElement);
+      resize();
+
+      // Synthetic ECG heartbeat wave shape (P-QRS-T complex)
+      function ecgPulse(phase) {
+        const p = ((phase % 1) + 1) % 1;
+        if (p > 0.12 && p < 0.2) return Math.sin(((p - 0.12) / 0.08) * Math.PI) * 0.18;
+        if (p >= 0.24 && p < 0.27) return -0.22;
+        if (p >= 0.27 && p < 0.31) return Math.sin(((p - 0.27) / 0.04) * Math.PI) * 1.15;
+        if (p >= 0.31 && p < 0.35) return -0.34;
+        if (p >= 0.44 && p < 0.56) return Math.sin(((p - 0.44) / 0.12) * Math.PI) * 0.28;
+        return 0;
+      }
+
+      let phase = 0;
+      let frame = 0;
+
+      function draw() {
+        const isCombat = state.waveState === 'combat';
+        const speedMult = (isCombat ? 1.85 : 1.0) * (state.hudMode === 'overclock' ? 1.25 : 1);
+        phase += 0.032 * speedMult;
+        frame++;
+
+        const palette = getThemePalette();
+        ctx.clearRect(0, 0, width, height);
+
+        // Background Oscilloscope Grid
+        ctx.strokeStyle = `rgba(${palette.accentRgb}, 0.08)`;
+        ctx.lineWidth = 1;
+        const stepX = 32;
+        const stepY = 26;
+        for (let x = 0; x < width; x += stepX) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+        for (let y = 0; y < height; y += stepY) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        const gainFactor = 0.45 + state.waveGain * 0.12;
+        const neuralBaseY = height * 0.36;
+        const ecgBaseY = height * 0.72;
+
+        // Wave 1: Neural Gamma-Wave BCI Signal
+        ctx.strokeStyle = palette.accent;
+        ctx.lineWidth = 1.9;
+        ctx.shadowColor = palette.accent;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        for (let x = 0; x <= width; x += 2) {
+          const nx = x * (isCombat ? 0.045 : 0.024);
+          const y =
+            neuralBaseY +
+            (Math.sin(nx + phase * 2.4) * 12 +
+              Math.sin(nx * 2.3 - phase * 4.1) * (isCombat ? 9 : 4.5) +
+              Math.cos(nx * 0.6 + phase) * 5) *
+              gainFactor;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Wave 2: Cardio ECG Signal
+        ctx.strokeStyle = palette.secondary;
+        ctx.lineWidth = 1.9;
+        ctx.shadowColor = palette.secondary;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        const ecgPeriod = isCombat ? 115 : 175;
+        for (let x = 0; x <= width; x += 2) {
+          const ecgPhase = x / ecgPeriod - phase * 0.28;
+          const amp = ecgPulse(ecgPhase) * 32 * gainFactor;
+          const y = ecgBaseY - amp;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        if (frame % 25 === 0 && bpmEl) {
+          const bpm = Math.round((isCombat ? 128 : 62) + state.waveGain * 2.2 + (Math.random() * 3 - 1.5));
+          const hz = Math.round((isCombat ? 84 : 38) + state.waveGain * 4.5);
+          bpmEl.textContent = `${bpm} BPM · ${hz} Hz`;
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    /* -------------------------------------------------------------------------
+       9. SYSTEM ARCHITECTURE: MINI DIAGNOSTIC TERMINAL ("SYNAPSE-OS v9.4")
+       ------------------------------------------------------------------------- */
+    const TERMINAL_LOGS = {
+      'diag --neural': [
+        { cls: 'text-accent', text: '> Executing cortical latency sweep (128 channels)...' },
+        { cls: 'text-titanium', text: '  Synaptic Bus #01-64 : 0.19ms [COHERENT]' },
+        { cls: 'text-titanium', text: '  Synaptic Bus #65-128: 0.21ms [COHERENT]' },
+        { cls: 'text-accent-sec', text: '[PASS] Zero packet loss. Motor intent lock nominal.' }
+      ],
+      'scan --biometrics': [
+        { cls: 'text-accent', text: '> Probing sub-dermal graphene sheath & vascular nodes...' },
+        { cls: 'text-titanium', text: '  Cellular Rejection Index : 0.002% (Threshold < 0.5%)' },
+        { cls: 'text-titanium', text: '  Core Thermal Delta       : +0.3°C [REGULATED]' },
+        { cls: 'text-accent-sec', text: '[PASS] Biocompatibility confirmed at 99.98%.' }
+      ],
+      'patch --ota': [
+        { cls: 'text-accent', text: '> Connecting to SYNAPSE-IX Quantum Relay...' },
+        { cls: 'text-titanium', text: '  Downloading firmware delta v9.4.3-signed (14.2 KB)...' },
+        { cls: 'text-titanium', text: '  Verifying Ed25519 signature... OK' },
+        { cls: 'text-accent-sec', text: '[UPDATED] Reflex arc micro-calibration applied live.' }
+      ]
+    };
+
+    function runTerminalCmd(cmd) {
+      const out = document.getElementById('terminal-output');
+      if (!out) return;
+
+      const ts = new Date().toTimeString().substring(0, 8);
+      const header = document.createElement('div');
+      header.className = 'text-titanium font-semibold pt-1';
+      header.textContent = `[${ts}] root@synapse-ix:~$ ${cmd}`;
+      out.appendChild(header);
+      out.scrollTop = out.scrollHeight;
+
+      const lines = TERMINAL_LOGS[cmd] || [{ cls: 'text-slateMuted', text: 'Command executed.' }];
+      lines.forEach((line, idx) => {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = line.cls;
+          el.textContent = line.text;
+          out.appendChild(el);
+          out.scrollTop = out.scrollHeight;
+        }, (idx + 1) * 160);
+      });
+    }
+
+    function clearTerminal() {
+      const out = document.getElementById('terminal-output');
+      if (!out) return;
+      out.innerHTML = '<div class="text-accent">[CLEARED] SYNAPSE-OS v9.4 awaiting command...</div>';
+    }
+
+    /* -------------------------------------------------------------------------
+       10. SYSTEM ARCHITECTURE: INTERACTIVE TACTILE HAPTIC PAD (BIO-HEXAGONS)
+       ------------------------------------------------------------------------- */
+    const hexCells = [];
+
+    function renderHapticHexGrid() {
+      const svg = document.getElementById('haptic-hex-svg');
+      if (!svg) return;
+      hexCells.length = 0;
+
+      const palette = getThemePalette();
+      const cols = 12;
+      const rows = 4;
+      const r = 21;
+      const dx = r * 1.92;
+      const dy = r * 1.68;
+
+      let markup = '';
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const cx = 34 + col * dx + (row % 2 === 1 ? dx * 0.5 : 0);
+          const cy = 32 + row * dy;
+          if (cx > 515) continue;
+
+          const pts = [];
+          for (let k = 0; k < 6; k++) {
+            const a = (Math.PI / 180) * (60 * k - 30);
+            pts.push(`${(cx + (r - 2) * Math.cos(a)).toFixed(1)},${(cy + (r - 2) * Math.sin(a)).toFixed(1)}`);
+          }
+          const id = `hex-${row}-${col}`;
+          hexCells.push({ id, cx, cy, row, col });
+          markup += `<polygon id="${id}" points="${pts.join(' ')}" class="haptic-hex" fill="rgba(${palette.accentRgb}, 0.04)" stroke="rgba(${palette.accentRgb}, 0.25)" stroke-width="1.1" />`;
+        }
+      }
+      svg.innerHTML = markup;
+    }
+
+    function initHapticPadInteractions() {
+      renderHapticHexGrid();
+      const svg = document.getElementById('haptic-hex-svg');
+      const newtonsEl = document.getElementById('haptic-newtons');
+      const cellsEl = document.getElementById('haptic-cells');
+      const coordEl = document.getElementById('haptic-coord');
+      if (!svg) return;
+
+      function applyPressure(clientX, clientY) {
+        const rect = svg.getBoundingClientRect();
+        const sx = ((clientX - rect.left) / rect.width) * 540;
+        const sy = ((clientY - rect.top) / rect.height) * 190;
+        const palette = getThemePalette();
+
+        let activeCount = 0;
+        let maxIntensity = 0;
+        let closestCell = null;
+
+        hexCells.forEach((cell) => {
+          const el = document.getElementById(cell.id);
+          if (!el) return;
+          const dist = Math.hypot(cell.cx - sx, cell.cy - sy);
+          const radius = 86;
+
+          if (dist < radius) {
+            const intensity = 1 - dist / radius;
+            activeCount++;
+            if (intensity > maxIntensity) {
+              maxIntensity = intensity;
+              closestCell = cell;
+            }
+            const useSec = intensity > 0.65;
+            el.setAttribute('fill', useSec ? `rgba(${palette.secondaryRgb}, ${(intensity * 0.55).toFixed(2)})` : `rgba(${palette.accentRgb}, ${(intensity * 0.42).toFixed(2)})`);
+            el.setAttribute('stroke', useSec ? palette.secondary : palette.accent);
+            el.style.transform = `scale(${(0.96 + intensity * 0.08).toFixed(3)})`;
+          } else {
+            el.setAttribute('fill', `rgba(${palette.accentRgb}, 0.04)`);
+            el.setAttribute('stroke', `rgba(${palette.accentRgb}, 0.25)`);
+            el.style.transform = 'scale(1)';
+          }
+        });
+
+        const forceN = (maxIntensity * 450 * (state.hudMode === 'overclock' ? 1.15 : 1)).toFixed(1);
+        if (newtonsEl) newtonsEl.textContent = `${forceN} N`;
+        if (cellsEl) cellsEl.textContent = String(activeCount).padStart(2, '0');
+        if (coordEl && closestCell) {
+          coordEl.textContent = `CELL: R${closestCell.row + 1}·C${closestCell.col + 1}`;
+        }
+      }
+
+      function resetPad() {
+        const palette = getThemePalette();
+        hexCells.forEach((cell) => {
+          const el = document.getElementById(cell.id);
+          if (!el) return;
+          el.setAttribute('fill', `rgba(${palette.accentRgb}, 0.04)`);
+          el.setAttribute('stroke', `rgba(${palette.accentRgb}, 0.25)`);
+          el.style.transform = 'scale(1)';
+        });
+        if (newtonsEl) newtonsEl.textContent = '0.0 N';
+        if (cellsEl) cellsEl.textContent = '00';
+        if (coordEl) coordEl.textContent = 'CELL: IDLE';
+      }
+
+      svg.addEventListener('pointermove', (e) => applyPressure(e.clientX, e.clientY));
+      svg.addEventListener('pointerdown', (e) => applyPressure(e.clientX, e.clientY));
+      svg.addEventListener('pointerleave', resetPad);
+    }
+
+    /* -------------------------------------------------------------------------
+       11. BIOCOMPATIBILITY CIRCULAR SVG RING ANIMATION ON VIEW
+       ------------------------------------------------------------------------- */
+    function initBiocompatRing() {
+      const wrap = document.getElementById('biocompat-ring-wrap');
+      const circle = document.getElementById('biocompat-progress-circle');
+      if (!wrap || !circle) return;
+
+      const circumference = 2 * Math.PI * 56; // 351.86
+      const targetOffset = circumference * (1 - 0.9998);
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            circle.style.strokeDashoffset = targetOffset.toFixed(2);
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.3 }
+      );
+      obs.observe(wrap);
+    }
+
+    /* -------------------------------------------------------------------------
+       12. INTERACTIVE RIG CONFIGURATOR
+       ------------------------------------------------------------------------- */
+    function computeRigStats() {
+      const selected = RIG_MODULES.filter((m) => state.selectedRigIds.has(m.id));
+      const rawIntegration = 10 + selected.reduce((sum, m) => sum + m.integration, 0);
+      const integration = Math.min(92, rawIntegration);
+
+      const rawWatts = 12 + selected.reduce((sum, m) => sum + m.watts, 0);
+      const powerLoad = Math.max(8, rawWatts);
+      const hasReactor = state.selectedRigIds.has('reactor');
+      const autonomyHours = Math.round((hasReactor ? 7200 : 3200) / powerLoad);
+
+      const baseReactionMs = 195;
+      const reduction = selected.reduce((sum, m) => sum + Math.abs(m.latencyDelta), 0);
+      const reactionMs = Math.max(12.4, baseReactionMs - reduction).toFixed(1);
+
+      const weightKg = (selected.reduce((sum, m) => sum + m.weightGrams, 0) / 1000).toFixed(2);
+
+      let operatorClass = 'BASELINE';
+      if (integration >= 76) operatorClass = 'APEX SYNTH';
+      else if (integration >= 56) operatorClass = 'VANGUARD';
+      else if (integration >= 36) operatorClass = 'STRIDER';
+      else if (integration >= 20) operatorClass = 'OBSERVER';
+
+      return { selected, integration, powerLoad, autonomyHours, reactionMs, weightKg, operatorClass };
+    }
+
+    function renderRigConfigurator() {
+      const grid = document.getElementById('rig-modules-grid');
+      if (!grid) return;
+
+      grid.innerHTML = RIG_MODULES.map((m) => {
+        const isOn = state.selectedRigIds.has(m.id);
+        return `
+          <button
+            type="button"
+            onclick="toggleRigModule('${m.id}')"
+            aria-pressed="${isOn}"
+            class="text-left hud-panel p-5 flex flex-col justify-between transition-all ${
+              isOn ? 'border-accent-strong bg-accent-soft' : 'opacity-85 hover:opacity-100'
+            }"
+            style="${isOn ? 'box-shadow: var(--glow-soft);' : ''}"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="font-mono text-[10px] tracking-widest uppercase ${isOn ? 'text-accent' : 'text-slateMuted'}">${m.code}</span>
+                <span class="w-5 h-5 rounded-md border flex items-center justify-center ${
+                  isOn ? 'bg-accent border-accent text-carbon' : 'border-accent/40 bg-carbon text-transparent'
+                }">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                </span>
+              </div>
+              <h3 class="font-display font-bold text-lg text-titanium uppercase">${m.name}</h3>
+              <p class="text-xs text-slateMuted mt-1">${m.role}</p>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-accent/35 grid grid-cols-3 gap-2 font-mono text-[10px]">
+              <div>
+                <div class="text-slateMuted text-[9px]">POWER</div>
+                <div class="${m.watts < 0 ? 'text-accent-sec' : 'text-titanium'} font-semibold">${m.watts < 0 ? m.watts : '+' + m.watts}W</div>
+              </div>
+              <div>
+                <div class="text-slateMuted text-[9px]">LATENCY</div>
+                <div class="text-accent font-semibold">${m.latencyDelta}ms</div>
+              </div>
+              <div>
+                <div class="text-slateMuted text-[9px]">MASS</div>
+                <div class="text-titanium font-semibold">${m.weightGrams}g</div>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      const stats = computeRigStats();
+      document.getElementById('rig-class-badge').textContent = stats.operatorClass;
+      document.getElementById('rig-integration-pct').textContent = `${stats.integration}%`;
+      document.getElementById('rig-power-load').textContent = `${stats.powerLoad} W`;
+      document.getElementById('rig-autonomy').textContent = `${stats.autonomyHours} HRS`;
+      document.getElementById('rig-reaction').textContent = `${stats.reactionMs} ms`;
+      document.getElementById('rig-weight').textContent = `${stats.weightKg} KG`;
+
+      // Render 12-segment integration bar
+      const segWrap = document.getElementById('rig-segmented-bar');
+      const filledCount = Math.round((stats.integration / 100) * 12);
+      segWrap.innerHTML = Array.from({ length: 12 }, (_, idx) => {
+        const filled = idx < filledCount;
+        const bg = filled
+          ? idx >= 9
+            ? 'background: var(--accent-alert);'
+            : idx >= 5
+            ? 'background: var(--accent);'
+            : 'background: var(--accent-secondary);'
+          : 'background: rgba(125,139,159,0.16);';
+        return `<div class="rounded-sm transition-all duration-300" style="${bg}"></div>`;
+      }).join('');
+
+      // Active module chips
+      const listWrap = document.getElementById('rig-selected-list');
+      if (stats.selected.length === 0) {
+        listWrap.innerHTML = '<span class="font-mono text-[11px] text-slateMuted">No cybernetic modules selected (Organic Baseline).</span>';
+      } else {
+        listWrap.innerHTML = stats.selected
+          .map((m) => `<span class="px-2.5 py-1 rounded-md bg-carbon border border-accent font-mono text-[10px] text-accent">${m.code}</span>`)
+          .join('');
+      }
+    }
+
+    function toggleRigModule(id) {
+      if (state.selectedRigIds.has(id)) state.selectedRigIds.delete(id);
+      else state.selectedRigIds.add(id);
+      renderRigConfigurator();
+    }
+
+    function resetRigConfigurator() {
+      state.selectedRigIds = new Set(['optic', 'cortex']);
+      renderRigConfigurator();
+      showToast('Rig configurator reset to standard Recon preset.');
+    }
+
+    /* -------------------------------------------------------------------------
+       13. INTERACTIVE 3-STEP BIOMETRIC CALIBRATION MODAL
+       ------------------------------------------------------------------------- */
+    function generateClearanceSerial() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      const suffixes = ['A', 'X', 'IX', 'Z', 'K'];
+      const suf = suffixes[Math.floor(Math.random() * suffixes.length)];
+      return `SYNX-IX-${num}-${suf}`;
+    }
+
+    function renderPassBarcode(serial) {
+      const svg = document.getElementById('pass-barcode');
+      if (!svg) return;
+      const palette = getThemePalette();
+      let x = 2;
+      let bars = '';
+      for (let i = 0; i < 32; i++) {
+        const code = serial.charCodeAt(i % serial.length) + i * 11;
+        const w = (code % 3) + 1.4;
+        const h = i % 5 === 0 ? 34 : 24 + (code % 9);
+        const color = i % 9 === 0 ? palette.secondary : palette.accent;
+        if (x + w < 142) {
+          bars += `<rect x="${x.toFixed(1)}" y="${((36 - h) / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h}" fill="${color}" opacity="0.9" />`;
+        }
+        x += w + (code % 2) + 1.4;
+      }
+      svg.innerHTML = bars;
+    }
+
+    function syncCalibRigPreview() {
+      const wrap = document.getElementById('calib-rig-preview');
+      if (!wrap) return;
+      const stats = computeRigStats();
+      if (stats.selected.length === 0) {
+        wrap.innerHTML = '<span class="text-slateMuted">Organic Baseline (No Hardware Locked)</span>';
+      } else {
+        wrap.innerHTML = stats.selected
+          .map((m) => `<span class="px-2 py-0.5 rounded bg-accent-soft border border-accent text-accent">${m.code}</span>`)
+          .join('');
+      }
+    }
+
+    function openCalibrationModal() {
+      syncCalibRigPreview();
+      goToCalibStep(1);
+      const modal = document.getElementById('calibration-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function openCalibrationFromRig() {
+      const trackEl = document.getElementById('calib-track');
+      if (trackEl) trackEl.value = 'Custom Rig Loadout';
+      openCalibrationModal();
+    }
+
+    function closeCalibrationModal() {
+      stopBiometricScan();
+      const modal = document.getElementById('calibration-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      document.body.style.overflow = '';
+    }
+
+    function goToCalibStep(step) {
+      stopBiometricScan();
+      [1, 2, 3].forEach((n) => {
+        const panel = document.getElementById(`calib-step-${n}`);
+        const ind = document.getElementById(`step-ind-${n}`);
+        if (panel) panel.classList.toggle('hidden', n !== step);
+        if (ind) {
+          if (n === step) {
+            ind.className = 'p-2 rounded-lg border border-accent-strong bg-accent-soft text-accent text-center font-semibold';
+          } else if (n < step) {
+            ind.className = 'p-2 rounded-lg border border-accent bg-carbon text-accent-sec text-center';
+          } else {
+            ind.className = 'p-2 rounded-lg border border-accent/30 bg-carbon text-slateMuted text-center';
+          }
+        }
+      });
+
+      if (step === 2) {
+        state.scanProgress = 0;
+        updateScanUI();
+      }
+      if (step === 3) {
+        populateClearancePass();
+      }
+    }
+
+    function updateScanUI() {
+      const pct = Math.min(100, Math.round(state.scanProgress));
+      const bar = document.getElementById('scan-progress-bar');
+      const pctEl = document.getElementById('scan-pct-text');
+      const statusEl = document.getElementById('scan-status-text');
+      const laser = document.getElementById('calib-scan-laser');
+
+      if (bar) bar.style.width = `${pct}%`;
+      if (pctEl) pctEl.textContent = `${pct}%`;
+
+      const active = state.scanHolding || state.scanAutoRunning;
+      if (laser) {
+        laser.classList.toggle('hidden', !active);
+        laser.classList.toggle('modal-laser-active', active);
+      }
+
+      if (statusEl) {
+        if (pct >= 100) statusEl.textContent = 'BIOMETRIC MATCH CONFIRMED';
+        else if (pct > 65) statusEl.textContent = 'INDEXING SYNAPTIC IMPEDANCE...';
+        else if (pct > 25) statusEl.textContent = 'MAPPING RETINAL & DERMAL HASH...';
+        else if (active) statusEl.textContent = 'SCANNING BIOMETRIC SIGNATURE...';
+        else statusEl.textContent = 'AWAITING BIOMETRIC CONTACT';
+      }
+    }
+
+    function runScanLoop() {
+      if (!state.scanHolding && !state.scanAutoRunning) return;
+      state.scanProgress += 1.45;
+      updateScanUI();
+
+      if (state.scanProgress >= 100) {
+        stopBiometricScan();
+        setTimeout(() => goToCalibStep(3), 260);
+        return;
+      }
+      state.scanRaf = requestAnimationFrame(runScanLoop);
+    }
+
+    function startHoldBiometricScan() {
+      if (state.scanProgress >= 100) return;
+      state.scanHolding = true;
+      updateScanUI();
+      if (state.scanRaf) cancelAnimationFrame(state.scanRaf);
+      state.scanRaf = requestAnimationFrame(runScanLoop);
+    }
+
+    function stopBiometricScan() {
+      state.scanHolding = false;
+      state.scanAutoRunning = false;
+      if (state.scanRaf) cancelAnimationFrame(state.scanRaf);
+      state.scanRaf = null;
+      updateScanUI();
+    }
+
+    function startAutoBiometricScan() {
+      state.scanAutoRunning = true;
+      updateScanUI();
+      if (state.scanRaf) cancelAnimationFrame(state.scanRaf);
+      state.scanRaf = requestAnimationFrame(runScanLoop);
+    }
+
+    function populateClearancePass() {
+      const callsign = (document.getElementById('calib-callsign').value || 'OPERATOR-IX').trim().toUpperCase();
+      const track = document.getElementById('calib-track').value || 'Custom Rig Loadout';
+      const stats = computeRigStats();
+
+      state.clearanceSerial = generateClearanceSerial();
+      const compat = (99.72 + Math.random() * 0.26).toFixed(2) + '%';
+
+      document.getElementById('pass-serial-id').textContent = state.clearanceSerial;
+      document.getElementById('pass-callsign').textContent = callsign;
+      document.getElementById('pass-compat').textContent = compat;
+      document.getElementById('pass-class').textContent = stats.operatorClass;
+      document.getElementById('pass-track').textContent = track;
+
+      const modWrap = document.getElementById('pass-modules');
+      if (stats.selected.length === 0) {
+        modWrap.innerHTML = '<span class="text-slateMuted">BASELINE CLEARANCE</span>';
+      } else {
+        modWrap.innerHTML = stats.selected
+          .map((m) => `<span class="px-2 py-0.5 rounded bg-accent-soft border border-accent text-accent">${m.code}</span>`)
+          .join('');
+      }
+      renderPassBarcode(state.clearanceSerial);
+    }
+
+    function copyClearanceSerial() {
+      copyTextToClipboard(state.clearanceSerial, `Clearance ID ${state.clearanceSerial} copied to clipboard!`);
+    }
+
+    function resetCalibration() {
+      goToCalibStep(1);
+    }
+
+    /* -------------------------------------------------------------------------
+       14. UTILITIES: IFRAME-SAFE CLIPBOARD, TOAST, DISPATCH, CURSOR & SCROLL
+       ------------------------------------------------------------------------- */
+    function copyTextToClipboard(text, toastMessage) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast(toastMessage || `Copied ${text}`);
+      } catch (err) {
+        showToast(`ID: ${text}`);
+      }
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      el.className =
+        'pointer-events-auto px-4 py-3 rounded-xl border border-accent-strong bg-gunmetal/95 backdrop-blur-md font-mono text-xs text-titanium shadow-[0_12px_32px_rgba(0,0,0,0.75)] flex items-center gap-2.5 opacity-0 translate-y-2 transition-all duration-300';
+      el.innerHTML = `<span class="w-2 h-2 rounded-full bg-accent shrink-0"></span><span>${msg}</span>`;
+      container.appendChild(el);
+
+      requestAnimationFrame(() => {
+        el.classList.remove('opacity-0', 'translate-y-2');
+      });
+      setTimeout(() => {
+        el.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    function handleDispatchSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('dispatch-email');
+      const email = input ? input.value.trim() : '';
+      if (!email) return;
+      if (input) input.value = '';
+      showToast(`Encrypted dispatch channel linked for ${email}`);
+    }
+
+    function initScrollProgressAndReveals() {
+      const bar = document.getElementById('scroll-progress');
+      window.addEventListener(
+        'scroll',
+        () => {
+          const top = window.scrollY;
+          const total = document.documentElement.scrollHeight - window.innerHeight;
+          const pct = total > 0 ? Math.min(100, (top / total) * 100) : 0;
+          if (bar) bar.style.width = `${pct}%`;
+        },
+        { passive: true }
+      );
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
+    }
+
+    function initTacticalCursor() {
+      const cursor = document.getElementById('tactical-cursor');
+      if (!cursor) return;
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+      let cx = -100, cy = -100;
+      let tx = -100, ty = -100;
+
+      window.addEventListener('mousemove', (e) => {
+        tx = e.clientX;
+        ty = e.clientY;
+        const interactive = e.target && e.target.closest('a, button, input, select, [role="button"], [role="tab"]');
+        cursor.classList.toggle('is-interactive', Boolean(interactive));
+      });
+
+      function animate() {
+        cx += (tx - cx) * 0.24;
+        cy += (ty - cy) * 0.24;
+        cursor.style.left = `${cx}px`;
+        cursor.style.top = `${cy}px`;
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function closeMobileDrawer() {
+      const drawer = document.getElementById('mobile-drawer');
+      if (drawer) drawer.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function initEventBindings() {
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const drawer = document.getElementById('mobile-drawer');
+      const drawerBackdrop = document.getElementById('mobile-drawer-backdrop');
+      if (menuBtn && drawer) {
+        menuBtn.addEventListener('click', () => {
+          drawer.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        });
+      }
+      if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeMobileDrawer);
+
+      const calibBackdrop = document.getElementById('calibration-backdrop');
+      if (calibBackdrop) calibBackdrop.addEventListener('click', closeCalibrationModal);
+
+      // Hold-to-Scan pointer events (mouse + touch)
+      const holdBtn = document.getElementById('hold-scan-btn');
+      if (holdBtn) {
+        holdBtn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          startHoldBiometricScan();
+        });
+        window.addEventListener('pointerup', () => {
+          if (state.scanHolding) stopBiometricScan();
+        });
+        holdBtn.addEventListener('pointerleave', () => {
+          if (state.scanHolding) stopBiometricScan();
+        });
+      }
+
+      // Keyboard Escape closes modals/drawers
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeCalibrationModal();
+          closeMobileDrawer();
+        }
+      });
+    }
+
+    /* -------------------------------------------------------------------------
+       15. BOOTSTRAP ON DOM READY
+       ------------------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      initLiveTelemetryClocks();
+      initHeroCyberEyeCanvas();
+      initHeroMetricsCountUp();
+      renderAnatomyHotspots();
+      renderAnatomyTabs();
+      updateAnatomyPanel();
+      initOscilloscopeCanvas();
+      initHapticPadInteractions();
+      initBiocompatRing();
+      renderRigConfigurator();
+      initScrollProgressAndReveals();
+      initTacticalCursor();
+      initEventBindings();
+    });
+  </script>
+</body>
+</html>
